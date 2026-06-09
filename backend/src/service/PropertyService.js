@@ -10,3 +10,15 @@ export const createProperty = async (propertyData) => {
     throw error;
   }
 };
+
+
+export const fetchAllProperties = async () => {
+  try {
+    // שליפת כל המסמכים מקולקציית "apartments"
+    const properties = await Property.find(); 
+    return properties;
+  } catch (error) {
+    console.error("Error fetching properties!:", error);
+    throw error;
+  }
+};
