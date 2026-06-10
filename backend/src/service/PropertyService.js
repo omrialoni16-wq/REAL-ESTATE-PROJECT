@@ -11,11 +11,9 @@ export const createProperty = async (propertyData) => {
   }
 };
 
-
 export const fetchAllProperties = async () => {
   try {
-    // שליפת כל המסמכים מקולקציית "apartments"
-    const properties = await Property.find(); 
+    const properties = await Property.find().sort({ _id: -1 }).limit(300);
     return properties;
   } catch (error) {
     console.error("Error fetching properties!:", error);
