@@ -20,3 +20,16 @@ export const fetchAllProperties = async () => {
     throw error;
   }
 };
+
+export const updateProperty = async (id, propertyData) => {
+  try {
+    const updated = await Property.findByIdAndUpdate(id, propertyData, {
+      new: true,
+      runValidators: true,
+    });
+    return updated;
+  } catch (error) {
+    console.error("Error updating property!:", error);
+    throw error;
+  }
+};

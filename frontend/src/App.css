@@ -134,8 +134,30 @@ h1 {
   align-self: flex-start;
 }
 
+.card-actions {
+  margin-top: auto;
+  display: flex;
+  gap: 8px;
+}
+
+.edit-btn {
+  flex: 1;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.edit-btn:hover {
+  background-color: #2980b9;
+}
+
 .delete-btn {
-  margin-top: auto; /* Pushes the button to the bottom */
+  flex: 1;
   background-color: #ff4d4f;
   color: white;
   border: none;
@@ -148,6 +170,18 @@ h1 {
 
 .delete-btn:hover {
   background-color: #d9363e;
+}
+
+.edit-submit-btn {
+  background-color: #3498db;
+}
+
+.edit-submit-btn:hover {
+  background-color: #2980b9;
+}
+
+.edit-modal-content {
+  border-top: 4px solid #3498db;
 }
 
 .fab {

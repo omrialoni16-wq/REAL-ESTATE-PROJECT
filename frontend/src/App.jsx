@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import PropertyCard from "./components/PropertyCard";
 import AddPropertyForm from "./components/AddPropertyForm";
+import EditPropertyForm from "./components/EditPropertyForm";
 import "./App.css";
 import FilterBar from "./components/FilterBar";
 import Pagination from "./components/Pagination";
@@ -19,6 +20,7 @@ function App() {
   const propertiesPerPage = 21;
 
   const [isLoading, setIsLoading] = useState(true);
+  const [editingProperty, setEditingProperty] = useState(null);
 
   useEffect(() => {
     const fetchProperties = async () => {
@@ -60,6 +62,25 @@ function App() {
         console.error("Error deleting property:", error);
         alert("Could not delete property. Please try again.");
       }
+    }
+  };
+
+  const handleEditProperty = async (updatedData) => {
+    try {
+      const response = await axios.put(
+        `http://localhost:5000/api/properties/${editingProperty._id}`,
+        updatedData,
+      );
+      setProperties(
+        properties.map((p) =>
+          p._id === editingProperty._id ? response.data : p,
+        ),
+      );
+      alert("Property updated successfully!");
+      setEditingProperty(null);
+    } catch (error) {
+      console.error("Failed updating property:", error);
+      alert("Could not update property. Check server console.");
     }
   };
 
@@ -121,6 +142,26 @@ function App() {
         </div>
       )}
 
+      {editingProperty && (
+        <div
+          className="modal-overlay"
+          onClick={() => setEditingProperty(null)}
+        >
+          <div className="modal-content edit-modal-content" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="close-modal-btn"
+              onClick={() => setEditingProperty(null)}
+            >
+              ✖
+            </button>
+            <EditPropertyForm
+              property={editingProperty}
+              onSave={handleEditProperty}
+            />
+          </div>
+        </div>
+      )}
+
       <button className="fab" onClick={() => setIsModalOpen(true)}>
         +
       </button>
@@ -137,6 +178,7 @@ function App() {
                 key={item._id}
                 property={item}
                 onDelete={handleDelete}
+                onEdit={setEditingProperty}
               />
             ))
           ) : (
