@@ -10,3 +10,13 @@ export const createProperty = async (propertyData) => {
     throw error;
   }
 };
+
+export const fetchAllProperties = async () => {
+  try {
+    const properties = await Property.find().sort({ _id: -1 }).limit(300);
+    return properties;
+  } catch (error) {
+    console.error("Error fetching properties!:", error);
+    throw error;
+  }
+};

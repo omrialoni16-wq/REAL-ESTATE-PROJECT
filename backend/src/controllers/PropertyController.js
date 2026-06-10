@@ -17,3 +17,16 @@ export const addProperty = async (req, res) => {
     });
   }
 };
+
+export const getAllProperties = async (req, res) => {
+  try {
+    const properties = await fetchAllProperties();
+    res.status(200).json(properties);
+  } catch (error) {
+    console.error("Error getting all properties:", error);
+    res.status(500).json({
+      message: "Failed to fetch properties.",
+      error: error.message,
+    });
+  }
+};
