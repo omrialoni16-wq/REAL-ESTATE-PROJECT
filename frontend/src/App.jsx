@@ -84,6 +84,10 @@ function App() {
     }
   };
 
+  const handleCancelEdit = () => {
+    setEditingProperty(null);
+  };
+
   const handleAddProperty = async (newPropertyData) => {
     try {
       const response = await axios.post(
@@ -150,13 +154,14 @@ function App() {
           <div className="modal-content edit-modal-content" onClick={(e) => e.stopPropagation()}>
             <button
               className="close-modal-btn"
-              onClick={() => setEditingProperty(null)}
+              onClick={handleCancelEdit}
             >
               ✖
             </button>
             <EditPropertyForm
               property={editingProperty}
               onSave={handleEditProperty}
+              onCancel={handleCancelEdit}
             />
           </div>
         </div>
