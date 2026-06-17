@@ -49,3 +49,20 @@ export const editProperty = async (req, res) => {
     });
   }
 };
+
+export const removeProperty = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await deleteProperty(id);
+    if (!deleted) {
+      return res.status(404).json({ message: "Property not found." });
+    }
+    res.status(200).json(deleted);
+  } catch (error) {
+    console.error("Error deleting property:", error);
+    res.status(400).json({
+      message: "Error deleting property.",
+      error: error.message,
+    });
+  }
+};

@@ -33,3 +33,13 @@ export const updateProperty = async (id, propertyData) => {
     throw error;
   }
 };
+
+export const deleteProperty = async (id) => {
+  try {
+    const deleted = await Property.findByIdAndDelete(id);
+    return deleted;
+  } catch (error) {
+    console.error("Error deleting property!:", error);
+    throw error;
+  }
+};
