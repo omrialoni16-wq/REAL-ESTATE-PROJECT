@@ -11,5 +11,7 @@ const router = express.Router();
 router.post("/api/properties", addProperty);
 router.get("/api/properties", getAllProperties);
 router.put("/api/properties/:id", editProperty);
+router.delete("/api/properties/:id", removeProperty);
 
 export default router;
+
