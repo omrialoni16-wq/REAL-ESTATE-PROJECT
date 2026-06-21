@@ -1,5 +1,6 @@
 import {
   fetchAllProperties,
+  fetchPropertyById,
   createProperty,
   deleteProperty,
   updateProperty,
@@ -27,6 +28,23 @@ export const getAllProperties = async (req, res) => {
     console.error("Error getting all properties:", error);
     res.status(500).json({
       message: "Failed to fetch properties.",
+      error: error.message,
+    });
+  }
+};
+
+export const getProperty = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const property = await fetchPropertyById(id);
+    if (!property) {
+      return res.status(404).json({ message: "Property not found." });
+    }
+    res.status(200).json(property);
+  } catch (error) {
+    console.error("Error getting property:", error);
+    res.status(400).json({
+      message: "Failed to fetch property.",
       error: error.message,
     });
   }
