@@ -41,14 +41,8 @@ export const deleteProperty = async (id) => {
   }
 
   try {
-<<<<<<< HEAD
-   
-    const properties = await Property.find(); 
-    return properties;
-=======
     const deleted = await Property.findByIdAndDelete(id);
     return deleted;
->>>>>>> 8264321a60d53cf55b1f25275417cae1d4773eac
   } catch (error) {
     console.error("Error deleting property!:", error);
     throw error;
