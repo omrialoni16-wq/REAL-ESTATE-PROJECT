@@ -1,6 +1,6 @@
 import React from "react";
 
-const PropertyCard = ({ property, onDelete }) => {
+const PropertyCard = ({ property, onDelete, onEdit }) => {
   return (
     <div className="property-card">
       {property.img && (
@@ -22,9 +22,14 @@ const PropertyCard = ({ property, onDelete }) => {
 
         <span className="type">{property.type}</span>
 
-        <button className="delete-btn" onClick={() => onDelete(property._id)}>
-          Delete Property
-        </button>
+        <div className="card-actions">
+          <button className="edit-btn" onClick={() => onEdit(property)}>
+            Edit
+          </button>
+          <button className="delete-btn" onClick={() => onDelete(property._id)}>
+            Delete
+          </button>
+        </div>
       </div>
     </div>
   );
