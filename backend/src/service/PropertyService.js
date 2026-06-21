@@ -14,7 +14,7 @@ export const createProperty = async (propertyData) => {
 
 export const fetchAllProperties = async () => {
   try {
-    // שליפת כל המסמכים מקולקציית "apartments"
+   
     const properties = await Property.find(); 
     return properties;
   } catch (error) {
