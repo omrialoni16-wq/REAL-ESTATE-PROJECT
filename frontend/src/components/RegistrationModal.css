@@ -1,0 +1,130 @@
+/* Custom typography loaded via @font-face (Poppins, served from Google's CDN
+   so no binary font file needs to live in the repo). */
+@font-face {
+  font-family: "PoppinsCustom";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("https://fonts.gstatic.com/s/poppins/v21/pxiEyp8kv8JHgFVrJJfecnFHGPc.woff2")
+    format("woff2");
+}
+
+.registration-modal {
+  max-width: 520px;
+}
+
+.registration-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  font-family: "PoppinsCustom", "Segoe UI", sans-serif;
+}
+
+.registration-title {
+  margin: 0 0 6px 0;
+  text-align: center;
+  color: #2c3e50;
+  /* text-shadow for a subtle depth effect on the heading */
+  text-shadow: 0 2px 6px rgba(44, 62, 80, 0.25);
+}
+
+/* Segmented role toggle */
+.role-toggle {
+  display: flex;
+  gap: 8px;
+  background: rgba(236, 240, 241, 0.6);
+  padding: 6px;
+  border-radius: 14px;
+}
+
+.role-option {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #34495e;
+  /* transition for the toggle highlight */
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    transform 0.2s ease;
+}
+
+.role-option:hover {
+  transform: translateY(-1px);
+}
+
+.role-option.active {
+  background-color: #3498db;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.35);
+}
+
+.registration-form input {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: border-color 0.3s ease;
+}
+
+.registration-form input:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.registration-form .form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.registration-form .form-row input {
+  flex: 1;
+}
+
+/* Agency-only fields collapse/expand with a transition */
+.agency-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  /* transition on max-height + opacity drives the reveal animation */
+  transition:
+    max-height 0.4s ease,
+    opacity 0.35s ease;
+}
+
+.agency-fields.open {
+  max-height: 320px;
+  opacity: 1;
+}
+
+.form-error {
+  margin: 0;
+  color: #c0392b;
+  background: rgba(231, 76, 60, 0.1);
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.form-success {
+  margin: 0;
+  color: #1e7e4f;
+  background: rgba(46, 204, 113, 0.12);
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.registration-form .submit-btn:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
+}

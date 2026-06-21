@@ -3,6 +3,9 @@ import axios from "axios";
 import PropertyCard from "./components/PropertyCard";
 import AddPropertyForm from "./components/AddPropertyForm";
 import EditPropertyForm from "./components/EditPropertyForm";
+import RegistrationModal from "./components/RegistrationModal";
+import VideoTour from "./components/VideoTour";
+import FloorPlanCanvas from "./components/FloorPlanCanvas";
 import "./App.css";
 import FilterBar from "./components/FilterBar";
 import Pagination from "./components/Pagination";
@@ -10,6 +13,7 @@ import Pagination from "./components/Pagination";
 function App() {
   const [properties, setProperties] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [filters, setFilters] = useState({
     city: "",
     maxPrice: "",
@@ -128,9 +132,23 @@ function App() {
 
   return (
     <div className="app-container">
-      <h1>My Property Listings</h1>
+      <header className="app-header">
+        <h1>My Property Listings</h1>
+        <nav className="app-nav">
+          <button
+            className="register-btn"
+            onClick={() => setIsRegisterOpen(true)}
+          >
+            Register
+          </button>
+        </nav>
+      </header>
 
       <FilterBar filters={filters} setFilters={setFilters} />
+
+      {isRegisterOpen && (
+        <RegistrationModal onClose={() => setIsRegisterOpen(false)} />
+      )}
 
       {isModalOpen && (
         <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
@@ -171,33 +189,68 @@ function App() {
         +
       </button>
 
-      {isLoading ? (
-        <div className="loading-message">
-          <h2>Loading properties... ⏳</h2>
-        </div>
-      ) : (
-        <div className="properties-grid">
-          {currentProperties && currentProperties.length > 0 ? (
-            currentProperties.map((item) => (
-              <PropertyCard
-                key={item._id}
-                property={item}
-                onDelete={handleDelete}
-                onEdit={setEditingProperty}
-              />
-            ))
-          ) : (
-            <p>No properties match your filters.</p>
-          )}
-        </div>
-      )}
+      <section className="listings-section" aria-label="Property listings">
+        {isLoading ? (
+          <div className="loading-message">
+            <h2>Loading properties... ⏳</h2>
+          </div>
+        ) : (
+          <div className="properties-grid">
+            {currentProperties && currentProperties.length > 0 ? (
+              currentProperties.map((item) => (
+                <PropertyCard
+                  key={item._id}
+                  property={item}
+                  onDelete={handleDelete}
+                  onEdit={setEditingProperty}
+                />
+              ))
+            ) : (
+              <p>No properties match your filters.</p>
+            )}
+          </div>
+        )}
 
-      <Pagination
-        propertiesPerPage={propertiesPerPage}
-        totalProperties={filteredProperties.length}
-        paginate={setCurrentPage}
-        currentPage={currentPage}
-      />
+        <Pagination
+          propertiesPerPage={propertiesPerPage}
+          totalProperties={filteredProperties.length}
+          paginate={setCurrentPage}
+          currentPage={currentPage}
+        />
+      </section>
+
+      <aside className="features-aside" aria-label="Why choose us">
+        <h3>Why choose us</h3>
+        {/* multiple-columns: the feature list flows across CSS columns */}
+        <ul className="feature-list">
+          <li>Verified listings</li>
+          <li>Virtual video tours</li>
+          <li>Sketch your floor plan</li>
+          <li>Trusted local agencies</li>
+          <li>No hidden fees</li>
+          <li>Fast mortgage support</li>
+          <li>Neighborhood insights</li>
+          <li>24/7 customer care</li>
+        </ul>
+      </aside>
+
+      <section className="media-section" aria-label="Property media tools">
+        <article className="media-block">
+          <h2>Virtual Tour</h2>
+          <VideoTour />
+        </article>
+        <article className="media-block">
+          <h2>Sketch a Floor Plan</h2>
+          <p className="media-hint">
+            Draw a rough layout of your dream home below.
+          </p>
+          <FloorPlanCanvas />
+        </article>
+      </section>
+
+      <footer className="app-footer">
+        <p>© {new Date().getFullYear()} My Property Listings — All rights reserved.</p>
+      </footer>
     </div>
   );
 }
