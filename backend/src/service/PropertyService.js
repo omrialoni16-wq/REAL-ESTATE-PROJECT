@@ -1,40 +1,45 @@
+import mongoose from "mongoose";
 import Property from "../models/Property.js";
 
+const validateObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
+
 export const createProperty = async (propertyData) => {
-  try {
-    const newProperty = new Property(propertyData);
-    const savedProperty = await newProperty.save();
-    return savedProperty;
-  } catch (error) {
-    console.error("Error creating property!:", error);
-    throw error;
+  if (!propertyData || typeof propertyData !== "object") {
+    throw new Error("Property data must be a valid object.");
   }
+
+  const newProperty = new Property(propertyData);
+  return await newProperty.save();
 };
 
 export const fetchAllProperties = async () => {
-  try {
-    const properties = await Property.find().sort({ _id: -1 }).limit(300);
-    return properties;
-  } catch (error) {
-    console.error("Error fetching properties!:", error);
-    throw error;
+  return await Property.find().sort({ createdAt: -1 }).limit(300).populate("listedBy", "firstName lastName agencyName role");
+};
+
+export const fetchPropertyById = async (id) => {
+  if (!validateObjectId(id)) {
+    throw new Error("Invalid property ID.");
   }
+
+  return await Property.findById(id).populate("listedBy", "firstName lastName agencyName role");
 };
 
 export const updateProperty = async (id, propertyData) => {
-  try {
-    const updated = await Property.findByIdAndUpdate(id, propertyData, {
-      new: true,
-      runValidators: true,
-    });
-    return updated;
-  } catch (error) {
-    console.error("Error updating property!:", error);
-    throw error;
+  if (!validateObjectId(id)) {
+    throw new Error("Invalid property ID.");
   }
+
+  return await Property.findByIdAndUpdate(id, propertyData, {
+    new: true,
+    runValidators: true,
+  }).populate("listedBy", "firstName lastName agencyName role");
 };
 
 export const deleteProperty = async (id) => {
+  if (!validateObjectId(id)) {
+    throw new Error("Invalid property ID.");
+  }
+
   try {
     const deleted = await Property.findByIdAndDelete(id);
     return deleted;
