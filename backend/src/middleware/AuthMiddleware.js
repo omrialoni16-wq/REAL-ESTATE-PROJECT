@@ -44,6 +44,19 @@ export const requireAgency = (req, res, next) => {
   return next();
 };
 
+// Allows only Admin accounts (e.g. managing property listings).
+export const requireAdmin = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "Not authenticated." });
+  }
+  if (req.user.role !== "Admin") {
+    return res
+      .status(403)
+      .json({ message: "Only admins can perform this action." });
+  }
+  return next();
+};
+
 // Ensures the authenticated Agency owns the property it tries to
 // edit/delete. Loads the property once and caches it on the request.
 export const requirePropertyOwnership = async (req, res, next) => {

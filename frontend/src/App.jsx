@@ -60,6 +60,20 @@ function App() {
     setCurrentPage(1);
   }, [filters]);
 
+  // Keep the JWT attached to every axios request while logged in so the
+  // backend can authorize admin-only actions (publish/edit/delete).
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    } else {
+      delete axios.defaults.headers.common["Authorization"];
+    }
+  }, [currentUser]);
+
+  // Only admins may use the CRUD features.
+  const isAdmin = currentUser?.role === "Admin";
+
   const handleDelete = async (propertyId) => {
     const isConfirmed = window.confirm(
       "Are you sure you want to delete this property?",
@@ -290,9 +304,11 @@ function App() {
         </div>
       )}
 
-      <button className="fab" onClick={() => setIsModalOpen(true)}>
-        +
-      </button>
+      {isAdmin && (
+        <button className="fab" onClick={() => setIsModalOpen(true)}>
+          +
+        </button>
+      )}
 
       {!isLoading && properties.length > 0 && (
         <section className="charts-section" aria-label="Listings analytics">
@@ -320,6 +336,7 @@ function App() {
                   onEdit={setEditingProperty}
                   onViewLocation={setLocationProperty}
                   onPublish={handlePublishToTwitter}
+                  canManage={isAdmin}
                 />
               ))
             ) : (

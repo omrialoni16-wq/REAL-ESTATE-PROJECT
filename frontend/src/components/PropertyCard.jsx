@@ -1,6 +1,13 @@
 import React from "react";
 
-const PropertyCard = ({ property, onDelete, onEdit, onViewLocation, onPublish }) => {
+const PropertyCard = ({
+  property,
+  onDelete,
+  onEdit,
+  onViewLocation,
+  onPublish,
+  canManage = false,
+}) => {
   return (
     <div className="property-card">
       {property.img && (
@@ -34,14 +41,19 @@ const PropertyCard = ({ property, onDelete, onEdit, onViewLocation, onPublish })
           </button>
         </div>
 
-        <div className="card-actions">
-          <button className="edit-btn" onClick={() => onEdit(property)}>
-            Edit
-          </button>
-          <button className="delete-btn" onClick={() => onDelete(property._id)}>
-            Delete
-          </button>
-        </div>
+        {canManage && (
+          <div className="card-actions">
+            <button className="edit-btn" onClick={() => onEdit(property)}>
+              Edit
+            </button>
+            <button
+              className="delete-btn"
+              onClick={() => onDelete(property._id)}
+            >
+              Delete
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
