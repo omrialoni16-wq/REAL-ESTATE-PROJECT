@@ -1,5 +1,9 @@
 import React, { useState } from "react";
 
+// Used when the publisher leaves the image URL empty.
+const DEFAULT_IMAGE =
+  "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=80";
+
 const AddPropertyForm = ({ onAdd }) => {
   const [formData, setFormData] = useState({
     street: "",
@@ -20,7 +24,12 @@ const AddPropertyForm = ({ onAdd }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onAdd(formData);
+    // Image is optional — use a generic photo if none was provided.
+    const payload = {
+      ...formData,
+      img: formData.img.trim() || DEFAULT_IMAGE,
+    };
+    onAdd(payload);
     setFormData({
       street: "",
       city: "",
@@ -98,10 +107,9 @@ const AddPropertyForm = ({ onAdd }) => {
       <input
         type="text"
         name="img"
-        placeholder="Image URL"
+        placeholder="Image URL (optional)"
         value={formData.img}
         onChange={handleChange}
-        required
       />
 
       <button type="submit" className="submit-btn">

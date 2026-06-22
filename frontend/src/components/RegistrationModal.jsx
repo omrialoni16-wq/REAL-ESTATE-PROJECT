@@ -7,6 +7,7 @@ const EMPTY_FORM = {
   lastName: "",
   email: "",
   phone: "",
+  password: "",
   role: "Buyer",
   agencyName: "",
   licenseNumber: "",
@@ -46,7 +47,7 @@ const RegistrationModal = ({ onClose, onRegistered }) => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/users",
+        "http://localhost:5000/api/auth/register",
         formData,
       );
       setSuccess(true);
@@ -128,6 +129,15 @@ const RegistrationModal = ({ onClose, onRegistered }) => {
             placeholder="Phone (optional)"
             value={formData.phone}
             onChange={handleChange}
+          />
+          <input
+            type="password"
+            name="password"
+            placeholder="Password (min 6 characters)"
+            value={formData.password}
+            onChange={handleChange}
+            minLength={6}
+            required
           />
 
           {/* Agency-only fields: collapsed for Buyers, revealed with a

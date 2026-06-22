@@ -4,7 +4,7 @@ import PropertyCard from "./components/PropertyCard";
 import AddPropertyForm from "./components/AddPropertyForm";
 import EditPropertyForm from "./components/EditPropertyForm";
 import RegistrationModal from "./components/RegistrationModal";
-import VideoTour from "./components/VideoTour";
+import LoginModal from "./components/LoginModal";
 import FloorPlanCanvas from "./components/FloorPlanCanvas";
 import PropertyMap from "./components/PropertyMap";
 import WeatherWidget from "./components/WeatherWidget";
@@ -18,6 +18,12 @@ function App() {
   const [properties, setProperties] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  // Restore a previous session from localStorage if one exists.
+  const [currentUser, setCurrentUser] = useState(() => {
+    const saved = localStorage.getItem("user");
+    return saved ? JSON.parse(saved) : null;
+  });
   const [filters, setFilters] = useState({
     city: "",
     maxPrice: "",
@@ -97,6 +103,12 @@ function App() {
     setEditingProperty(null);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setCurrentUser(null);
+  };
+
   const handleAddProperty = async (newPropertyData) => {
     try {
       const response = await axios.post(
@@ -161,12 +173,31 @@ function App() {
       <header className="app-header">
         <h1>My Property Listings</h1>
         <nav className="app-nav">
-          <button
-            className="register-btn"
-            onClick={() => setIsRegisterOpen(true)}
-          >
-            Register
-          </button>
+          {currentUser ? (
+            <>
+              <span className="user-greeting">
+                Hi, {currentUser.firstName} ({currentUser.role})
+              </span>
+              <button className="register-btn" onClick={handleLogout}>
+                Sign Out
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                className="register-btn"
+                onClick={() => setIsLoginOpen(true)}
+              >
+                Sign In
+              </button>
+              <button
+                className="register-btn"
+                onClick={() => setIsRegisterOpen(true)}
+              >
+                Register
+              </button>
+            </>
+          )}
         </nav>
       </header>
 
@@ -174,6 +205,13 @@ function App() {
 
       {isRegisterOpen && (
         <RegistrationModal onClose={() => setIsRegisterOpen(false)} />
+      )}
+
+      {isLoginOpen && (
+        <LoginModal
+          onClose={() => setIsLoginOpen(false)}
+          onLoggedIn={setCurrentUser}
+        />
       )}
 
       {isModalOpen && (
@@ -303,7 +341,6 @@ function App() {
         {/* multiple-columns: the feature list flows across CSS columns */}
         <ul className="feature-list">
           <li>Verified listings</li>
-          <li>Virtual video tours</li>
           <li>Sketch your floor plan</li>
           <li>Trusted local agencies</li>
           <li>No hidden fees</li>
@@ -314,10 +351,6 @@ function App() {
       </aside>
 
       <section className="media-section" aria-label="Property media tools">
-        <article className="media-block">
-          <h2>Virtual Tour</h2>
-          <VideoTour />
-        </article>
         <article className="media-block">
           <h2>Sketch a Floor Plan</h2>
           <p className="media-hint">

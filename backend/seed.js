@@ -1,15 +1,17 @@
-import dotenv from "dotenv";
+import "dotenv/config";
 import connectDB from "./src/config/db.js";
 import User from "./src/models/User.js";
-import Property from "./src/models/Property.js";
 
-dotenv.config();
-
+// This seed only populates the USERS cluster (accounts).
+// Property listings live in their own cluster and are left untouched.
 const seed = async () => {
   try {
-    await connectDB();
+    connectDB();
 
-    await Promise.all([User.deleteMany(), Property.deleteMany()]);
+    await User.deleteMany();
+
+    // Shared dev password so any seeded account can log in for testing.
+    const DEFAULT_PASSWORD = "Password123!";
 
     const agencies = await User.create([
       {
@@ -18,6 +20,7 @@ const seed = async () => {
         email: "liron.gold@ta-realty.co.il",
         phone: "+972-54-123-4567",
         role: "Agency",
+        password: DEFAULT_PASSWORD,
         agencyName: "Tel Aviv Realty Group",
         licenseNumber: "TA-1138",
         officeAddress: "Rothschild Blvd 20, Tel Aviv",
@@ -28,6 +31,7 @@ const seed = async () => {
         email: "maya@hayarkonhomes.co.il",
         phone: "+972-52-987-6543",
         role: "Agency",
+        password: DEFAULT_PASSWORD,
         agencyName: "HaYarkon Homes",
         licenseNumber: "TA-2045",
         officeAddress: "Yarkon Street 12, Tel Aviv",
@@ -38,6 +42,7 @@ const seed = async () => {
         email: "noam@nevetzedek.agency",
         phone: "+972-54-321-9876",
         role: "Agency",
+        password: DEFAULT_PASSWORD,
         agencyName: "Neve Tzedek Agency",
         licenseNumber: "TA-3301",
         officeAddress: "Shabazi Street 8, Tel Aviv",
@@ -51,6 +56,7 @@ const seed = async () => {
         email: "noa.cohen@example.com",
         phone: "+972-52-111-2222",
         role: "Buyer",
+        password: DEFAULT_PASSWORD,
       },
       {
         firstName: "Amit",
@@ -58,6 +64,7 @@ const seed = async () => {
         email: "amit.levi@example.com",
         phone: "+972-54-333-4444",
         role: "Buyer",
+        password: DEFAULT_PASSWORD,
       },
       {
         firstName: "Shira",
@@ -65,81 +72,39 @@ const seed = async () => {
         email: "shira.kaplan@example.com",
         phone: "+972-50-555-6666",
         role: "Buyer",
+        password: DEFAULT_PASSWORD,
       },
     ]);
 
-    const properties = await Property.create([
+    // 4 admin accounts (basic, for the project only).
+    const admins = await User.create([
       {
-        img: "https://example.com/images/florentin-loft.jpg",
-        price: 5100000,
-        street: "Lilienblum 25",
-        city: "Tel Aviv",
-        type: "Apartment",
-        rooms: 3,
-        floor: 4,
-        size: 82,
-        tags: ["Balcony", "Renovated", "Central"],
-        listingType: "premium",
-        videoUrl: "https://example.com/videos/florentin-loft.mp4",
-        info1: "Modern apartment with open kitchen in Florentin.",
-        listedBy: agencies[0]._id,
+        firstName: "Omri",
+        lastName: "Admin",
+        email: "admin1@realestate.local",
+        role: "Admin",
+        password: "admin123",
       },
       {
-        img: "https://example.com/images/neve-tzedek-penthouse.jpg",
-        price: 12450000,
-        street: "Shabazi 3",
-        city: "Tel Aviv",
-        type: "Penthouse",
-        rooms: 5,
-        floor: 8,
-        size: 170,
-        tags: ["Roof Deck", "Sea View", "Bright"],
-        listingType: "premium",
-        videoUrl: "https://example.com/videos/neve-tzedek-penthouse.mp4",
-        info1: "Luxury penthouse close to the Neve Tzedek promenade.",
-        listedBy: agencies[2]._id,
+        firstName: "Dan",
+        lastName: "Admin",
+        email: "admin2@realestate.local",
+        role: "Admin",
+        password: "admin123",
       },
       {
-        img: "https://example.com/images/old-jaffa-house.jpg",
-        price: 7800000,
-        street: "HaMetsuda 14",
-        city: "Tel Aviv",
-        type: "House",
-        rooms: 4,
-        floor: 2,
-        size: 135,
-        tags: ["Garden", "Patio", "Historic"],
-        listingType: "standard",
-        info1: "Spacious house in Old Jaffa with private garden.",
-        listedBy: agencies[1]._id,
+        firstName: "Tal",
+        lastName: "Admin",
+        email: "admin3@realestate.local",
+        role: "Admin",
+        password: "admin123",
       },
       {
-        img: "https://example.com/images/azure-beach-apartment.jpg",
-        price: 3650000,
-        street: "Bograshov 47",
-        city: "Tel Aviv",
-        type: "Apartment",
-        rooms: 2,
-        floor: 5,
-        size: 58,
-        tags: ["Beachfront", "Air Conditioning", "Quiet"],
-        listingType: "standard",
-        info1: "Cozy beachside apartment in the heart of Tel Aviv.",
-        listedBy: agencies[0]._id,
-      },
-      {
-        img: "https://example.com/images/gordon-villas.jpg",
-        price: 8950000,
-        street: "Gordon 98",
-        city: "Tel Aviv",
-        type: "Apartment",
-        rooms: 4,
-        floor: 7,
-        size: 120,
-        tags: ["Renovated", "Elevator", "Parking"],
-        listingType: "standard",
-        info1: "Large apartment near Gordon Beach and shopping.",
-        listedBy: agencies[1]._id,
+        firstName: "Daniel",
+        lastName: "Admin",
+        email: "admin4@realestate.local",
+        role: "Admin",
+        password: "admin123",
       },
     ]);
 
@@ -157,10 +122,11 @@ const seed = async () => {
       agencies[2].save(),
     ]);
 
-    console.log("Seed data created successfully:");
+    console.log("User seed created successfully (USERS cluster):");
     console.log(`- Agencies: ${agencies.length}`);
     console.log(`- Buyers: ${buyers.length}`);
-    console.log(`- Properties: ${properties.length}`);
+    console.log(`- Admins: ${admins.length}`);
+    console.log("Property listings were left untouched.");
     process.exit(0);
   } catch (error) {
     console.error("Seed failed:", error);

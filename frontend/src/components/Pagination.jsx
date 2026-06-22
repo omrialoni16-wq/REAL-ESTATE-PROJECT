@@ -6,23 +6,64 @@ const Pagination = ({
   paginate,
   currentPage,
 }) => {
-  const pageNumbers = [];
+  const totalPages = Math.ceil(totalProperties / propertiesPerPage);
 
-  for (let i = 1; i <= Math.ceil(totalProperties / propertiesPerPage); i++) {
-    pageNumbers.push(i);
-  }
+  if (totalPages <= 1) return null;
+
+  const getPages = () => {
+    if (totalPages <= 5) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    // Near start
+    if (currentPage <= 3) {
+      return [1, 2, 3, "...", totalPages];
+    }
+
+    // Near end
+    if (currentPage >= totalPages - 2) {
+      return [1, "...", totalPages - 2, totalPages - 1, totalPages];
+    }
+
+    // Middle: show current page with neighbours
+    return [1, "...", currentPage - 1, currentPage, currentPage + 1, "...", totalPages];
+  };
+
+  const pages = getPages();
 
   return (
     <div className="pagination">
-      {pageNumbers.map((number) => (
-        <button
-          key={number}
-          onClick={() => paginate(number)}
-          className={`page-link ${currentPage === number ? "active" : ""}`}
-        >
-          {number}
-        </button>
-      ))}
+      <button
+        onClick={() => paginate(currentPage - 1)}
+        disabled={currentPage === 1}
+        className="page-link page-nav"
+      >
+        &laquo;
+      </button>
+
+      {pages.map((page, idx) =>
+        page === "..." ? (
+          <span key={`ellipsis-${idx}`} className="page-ellipsis">
+            …
+          </span>
+        ) : (
+          <button
+            key={page}
+            onClick={() => paginate(page)}
+            className={`page-link ${currentPage === page ? "active" : ""}`}
+          >
+            {page}
+          </button>
+        )
+      )}
+
+      <button
+        onClick={() => paginate(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className="page-link page-nav"
+      >
+        &raquo;
+      </button>
     </div>
   );
 };
