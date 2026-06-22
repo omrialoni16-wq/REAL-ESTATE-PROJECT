@@ -1,6 +1,6 @@
 import React from "react";
 
-const PropertyCard = ({ property, onDelete, onEdit }) => {
+const PropertyCard = ({ property, onDelete, onEdit, onViewLocation, onPublish }) => {
   return (
     <div className="property-card">
       {property.img && (
@@ -21,6 +21,18 @@ const PropertyCard = ({ property, onDelete, onEdit }) => {
         </div>
 
         <span className="type">{property.type}</span>
+
+        <div className="card-actions">
+          <button
+            className="location-btn"
+            onClick={() => onViewLocation(property)}
+          >
+            📍 View Location
+          </button>
+          <button className="publish-btn" onClick={() => onPublish(property)}>
+            𝕏 Publish
+          </button>
+        </div>
 
         <div className="card-actions">
           <button className="edit-btn" onClick={() => onEdit(property)}>

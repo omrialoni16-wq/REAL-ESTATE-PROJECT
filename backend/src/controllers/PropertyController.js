@@ -1,5 +1,6 @@
 import {
   fetchAllProperties,
+  fetchPropertyById,
   createProperty,
   deleteProperty,
   updateProperty,
@@ -32,6 +33,23 @@ export const getAllProperties = async (req, res) => {
   }
 };
 
+export const getProperty = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const property = await fetchPropertyById(id);
+    if (!property) {
+      return res.status(404).json({ message: "Property not found." });
+    }
+    res.status(200).json(property);
+  } catch (error) {
+    console.error("Error getting property:", error);
+    res.status(400).json({
+      message: "Failed to fetch property.",
+      error: error.message,
+    });
+  }
+};
+
 export const editProperty = async (req, res) => {
   try {
     const { id } = req.params;
@@ -45,6 +63,23 @@ export const editProperty = async (req, res) => {
     console.error("Error editing property:", error);
     res.status(400).json({
       message: "Error updating property.",
+      error: error.message,
+    });
+  }
+};
+
+export const removeProperty = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await deleteProperty(id);
+    if (!deleted) {
+      return res.status(404).json({ message: "Property not found." });
+    }
+    res.status(200).json(deleted);
+  } catch (error) {
+    console.error("Error deleting property:", error);
+    res.status(400).json({
+      message: "Error deleting property.",
       error: error.message,
     });
   }

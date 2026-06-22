@@ -3,6 +3,13 @@ import axios from "axios";
 import PropertyCard from "./components/PropertyCard";
 import AddPropertyForm from "./components/AddPropertyForm";
 import EditPropertyForm from "./components/EditPropertyForm";
+import RegistrationModal from "./components/RegistrationModal";
+import VideoTour from "./components/VideoTour";
+import FloorPlanCanvas from "./components/FloorPlanCanvas";
+import PropertyMap from "./components/PropertyMap";
+import WeatherWidget from "./components/WeatherWidget";
+import PriceByCityChart from "./components/charts/PriceByCityChart";
+import PropertyTypePieChart from "./components/charts/PropertyTypePieChart";
 import "./App.css";
 import FilterBar from "./components/FilterBar";
 import Pagination from "./components/Pagination";
@@ -10,6 +17,7 @@ import Pagination from "./components/Pagination";
 function App() {
   const [properties, setProperties] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [filters, setFilters] = useState({
     city: "",
     maxPrice: "",
@@ -21,6 +29,7 @@ function App() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [editingProperty, setEditingProperty] = useState(null);
+  const [locationProperty, setLocationProperty] = useState(null);
 
   useEffect(() => {
     const fetchProperties = async () => {
@@ -84,6 +93,10 @@ function App() {
     }
   };
 
+  const handleCancelEdit = () => {
+    setEditingProperty(null);
+  };
+
   const handleAddProperty = async (newPropertyData) => {
     try {
       const response = await axios.post(
@@ -96,6 +109,27 @@ function App() {
     } catch (error) {
       console.error("Failed adding property:", error);
       alert("Could not add property. Check server console.");
+    }
+  };
+
+  const handlePublishToTwitter = async (property) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/social/twitter",
+        property,
+      );
+      alert(`Published to Twitter!\n${response.data.url || ""}`);
+    } catch (error) {
+      const data = error.response?.data;
+      if (data?.previewText) {
+        // Credentials not configured — show what would have been posted.
+        alert(
+          `Twitter is not connected yet. Preview of the tweet:\n\n${data.previewText}`,
+        );
+      } else {
+        console.error("Failed to publish to Twitter:", error);
+        alert("Could not publish to Twitter. Check server console.");
+      }
     }
   };
 
@@ -124,9 +158,23 @@ function App() {
 
   return (
     <div className="app-container">
-      <h1>My Property Listings</h1>
+      <header className="app-header">
+        <h1>My Property Listings</h1>
+        <nav className="app-nav">
+          <button
+            className="register-btn"
+            onClick={() => setIsRegisterOpen(true)}
+          >
+            Register
+          </button>
+        </nav>
+      </header>
 
       <FilterBar filters={filters} setFilters={setFilters} />
+
+      {isRegisterOpen && (
+        <RegistrationModal onClose={() => setIsRegisterOpen(false)} />
+      )}
 
       {isModalOpen && (
         <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
@@ -150,14 +198,56 @@ function App() {
           <div className="modal-content edit-modal-content" onClick={(e) => e.stopPropagation()}>
             <button
               className="close-modal-btn"
-              onClick={() => setEditingProperty(null)}
+              onClick={handleCancelEdit}
             >
               ✖
             </button>
             <EditPropertyForm
               property={editingProperty}
               onSave={handleEditProperty}
+              onCancel={handleCancelEdit}
             />
+          </div>
+        </div>
+      )}
+
+      {locationProperty && (
+        <div className="modal-overlay" onClick={() => setLocationProperty(null)}>
+          <div
+            className="modal-content location-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="close-modal-btn"
+              onClick={() => setLocationProperty(null)}
+            >
+              ✖
+            </button>
+            <h2>
+              {locationProperty.street}, {locationProperty.city}
+            </h2>
+            <p className="location-address">
+              {locationProperty.type} · ₪
+              {locationProperty.price?.toLocaleString()}
+            </p>
+
+            <PropertyMap
+              lat={locationProperty.lat}
+              lng={locationProperty.lng}
+              address={`${locationProperty.street}, ${locationProperty.city}`}
+              label={`${locationProperty.street}, ${locationProperty.city}`}
+            />
+
+            <WeatherWidget city={locationProperty.city} />
+
+            <div className="location-actions">
+              <button
+                className="publish-btn"
+                onClick={() => handlePublishToTwitter(locationProperty)}
+              >
+                𝕏 Publish this listing
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -166,33 +256,80 @@ function App() {
         +
       </button>
 
-      {isLoading ? (
-        <div className="loading-message">
-          <h2>Loading properties... ⏳</h2>
-        </div>
-      ) : (
-        <div className="properties-grid">
-          {currentProperties && currentProperties.length > 0 ? (
-            currentProperties.map((item) => (
-              <PropertyCard
-                key={item._id}
-                property={item}
-                onDelete={handleDelete}
-                onEdit={setEditingProperty}
-              />
-            ))
-          ) : (
-            <p>No properties match your filters.</p>
-          )}
-        </div>
+      {!isLoading && properties.length > 0 && (
+        <section className="charts-section" aria-label="Listings analytics">
+          <PriceByCityChart properties={properties} />
+          <PropertyTypePieChart properties={properties} />
+        </section>
       )}
 
-      <Pagination
-        propertiesPerPage={propertiesPerPage}
-        totalProperties={filteredProperties.length}
-        paginate={setCurrentPage}
-        currentPage={currentPage}
-      />
+      {/* Shared tooltip layer used by the D3 charts */}
+      <div className="chart-tooltip" />
+
+      <section className="listings-section" aria-label="Property listings">
+        {isLoading ? (
+          <div className="loading-message">
+            <h2>Loading properties... ⏳</h2>
+          </div>
+        ) : (
+          <div className="properties-grid">
+            {currentProperties && currentProperties.length > 0 ? (
+              currentProperties.map((item) => (
+                <PropertyCard
+                  key={item._id}
+                  property={item}
+                  onDelete={handleDelete}
+                  onEdit={setEditingProperty}
+                  onViewLocation={setLocationProperty}
+                  onPublish={handlePublishToTwitter}
+                />
+              ))
+            ) : (
+              <p>No properties match your filters.</p>
+            )}
+          </div>
+        )}
+
+        <Pagination
+          propertiesPerPage={propertiesPerPage}
+          totalProperties={filteredProperties.length}
+          paginate={setCurrentPage}
+          currentPage={currentPage}
+        />
+      </section>
+
+      <aside className="features-aside" aria-label="Why choose us">
+        <h3>Why choose us</h3>
+        {/* multiple-columns: the feature list flows across CSS columns */}
+        <ul className="feature-list">
+          <li>Verified listings</li>
+          <li>Virtual video tours</li>
+          <li>Sketch your floor plan</li>
+          <li>Trusted local agencies</li>
+          <li>No hidden fees</li>
+          <li>Fast mortgage support</li>
+          <li>Neighborhood insights</li>
+          <li>24/7 customer care</li>
+        </ul>
+      </aside>
+
+      <section className="media-section" aria-label="Property media tools">
+        <article className="media-block">
+          <h2>Virtual Tour</h2>
+          <VideoTour />
+        </article>
+        <article className="media-block">
+          <h2>Sketch a Floor Plan</h2>
+          <p className="media-hint">
+            Draw a rough layout of your dream home below.
+          </p>
+          <FloorPlanCanvas />
+        </article>
+      </section>
+
+      <footer className="app-footer">
+        <p>© {new Date().getFullYear()} My Property Listings — All rights reserved.</p>
+      </footer>
     </div>
   );
 }

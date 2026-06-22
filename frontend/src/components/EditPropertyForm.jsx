@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-const EditPropertyForm = ({ property, onSave }) => {
+const EditPropertyForm = ({ property, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
     street: property.street || "",
     city: property.city || "",
@@ -11,6 +11,19 @@ const EditPropertyForm = ({ property, onSave }) => {
     type: property.type || "Apartment",
     img: property.img || "",
   });
+
+  useEffect(() => {
+    setFormData({
+      street: property.street || "",
+      city: property.city || "",
+      price: property.price || "",
+      rooms: property.rooms || "",
+      floor: property.floor || "",
+      size: property.size || "",
+      type: property.type || "Apartment",
+      img: property.img || "",
+    });
+  }, [property]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -86,9 +99,14 @@ const EditPropertyForm = ({ property, onSave }) => {
         value={formData.img}
         onChange={handleChange}
       />
-      <button type="submit" className="submit-btn edit-submit-btn">
-        Save Changes
-      </button>
+      <div className="button-row">
+        <button type="button" className="cancel-btn" onClick={onCancel}>
+          Cancel
+        </button>
+        <button type="submit" className="submit-btn edit-submit-btn">
+          Save Changes
+        </button>
+      </div>
     </form>
   );
 };
