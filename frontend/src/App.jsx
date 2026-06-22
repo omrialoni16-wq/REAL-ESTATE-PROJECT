@@ -6,6 +6,10 @@ import EditPropertyForm from "./components/EditPropertyForm";
 import RegistrationModal from "./components/RegistrationModal";
 import VideoTour from "./components/VideoTour";
 import FloorPlanCanvas from "./components/FloorPlanCanvas";
+import PropertyMap from "./components/PropertyMap";
+import WeatherWidget from "./components/WeatherWidget";
+import PriceByCityChart from "./components/charts/PriceByCityChart";
+import PropertyTypePieChart from "./components/charts/PropertyTypePieChart";
 import "./App.css";
 import FilterBar from "./components/FilterBar";
 import Pagination from "./components/Pagination";
@@ -25,6 +29,7 @@ function App() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [editingProperty, setEditingProperty] = useState(null);
+  const [locationProperty, setLocationProperty] = useState(null);
 
   useEffect(() => {
     const fetchProperties = async () => {
@@ -107,6 +112,27 @@ function App() {
     }
   };
 
+  const handlePublishToTwitter = async (property) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/social/twitter",
+        property,
+      );
+      alert(`Published to Twitter!\n${response.data.url || ""}`);
+    } catch (error) {
+      const data = error.response?.data;
+      if (data?.previewText) {
+        // Credentials not configured — show what would have been posted.
+        alert(
+          `Twitter is not connected yet. Preview of the tweet:\n\n${data.previewText}`,
+        );
+      } else {
+        console.error("Failed to publish to Twitter:", error);
+        alert("Could not publish to Twitter. Check server console.");
+      }
+    }
+  };
+
   const filteredProperties = properties.filter((property) => {
     const matchesCity = property.city
       .toLowerCase()
@@ -185,9 +211,60 @@ function App() {
         </div>
       )}
 
+      {locationProperty && (
+        <div className="modal-overlay" onClick={() => setLocationProperty(null)}>
+          <div
+            className="modal-content location-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="close-modal-btn"
+              onClick={() => setLocationProperty(null)}
+            >
+              ✖
+            </button>
+            <h2>
+              {locationProperty.street}, {locationProperty.city}
+            </h2>
+            <p className="location-address">
+              {locationProperty.type} · ₪
+              {locationProperty.price?.toLocaleString()}
+            </p>
+
+            <PropertyMap
+              lat={locationProperty.lat}
+              lng={locationProperty.lng}
+              address={`${locationProperty.street}, ${locationProperty.city}`}
+              label={`${locationProperty.street}, ${locationProperty.city}`}
+            />
+
+            <WeatherWidget city={locationProperty.city} />
+
+            <div className="location-actions">
+              <button
+                className="publish-btn"
+                onClick={() => handlePublishToTwitter(locationProperty)}
+              >
+                𝕏 Publish this listing
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <button className="fab" onClick={() => setIsModalOpen(true)}>
         +
       </button>
+
+      {!isLoading && properties.length > 0 && (
+        <section className="charts-section" aria-label="Listings analytics">
+          <PriceByCityChart properties={properties} />
+          <PropertyTypePieChart properties={properties} />
+        </section>
+      )}
+
+      {/* Shared tooltip layer used by the D3 charts */}
+      <div className="chart-tooltip" />
 
       <section className="listings-section" aria-label="Property listings">
         {isLoading ? (
@@ -203,6 +280,8 @@ function App() {
                   property={item}
                   onDelete={handleDelete}
                   onEdit={setEditingProperty}
+                  onViewLocation={setLocationProperty}
+                  onPublish={handlePublishToTwitter}
                 />
               ))
             ) : (
