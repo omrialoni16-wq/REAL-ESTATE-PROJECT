@@ -1,10 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import PropertyCard from "./components/PropertyCard";
 import AddPropertyForm from "./components/AddPropertyForm";
 import EditPropertyForm from "./components/EditPropertyForm";
 import RegistrationModal from "./components/RegistrationModal";
 import LoginModal from "./components/LoginModal";
+import InquiryModal from "./components/InquiryModal";
+import UserProfileModal from "./components/UserProfileModal";
+import AdminPanel from "./components/AdminPanel";
 import FloorPlanCanvas from "./components/FloorPlanCanvas";
 import PropertyMap from "./components/PropertyMap";
 import WeatherWidget from "./components/WeatherWidget";
@@ -19,49 +22,55 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  // Restore a previous session from localStorage if one exists.
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+
   const [currentUser, setCurrentUser] = useState(() => {
     const saved = localStorage.getItem("user");
     return saved ? JSON.parse(saved) : null;
   });
-  const [filters, setFilters] = useState({
-    city: "",
-    maxPrice: "",
-    type: "All",
-  });
 
+  const [filters, setFilters] = useState({ city: "", maxPrice: "", type: "All" });
   const [currentPage, setCurrentPage] = useState(1);
   const propertiesPerPage = 21;
 
   const [isLoading, setIsLoading] = useState(true);
   const [editingProperty, setEditingProperty] = useState(null);
   const [locationProperty, setLocationProperty] = useState(null);
+  const [inquiryProperty, setInquiryProperty] = useState(null);
 
-  useEffect(() => {
-    const fetchProperties = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:5000/api/properties",
-        );
-        console.log("fetch properties:", response.data);
-        setProperties(response.data);
-        setIsModalOpen(false);
-      } catch (error) {
-        console.error("failed to fetch properties", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  // Fetch properties from the backend, passing filters as query params so the
+  // DB does the filtering instead of the browser.
+  const fetchProperties = useCallback(async (activeFilters) => {
+    setIsLoading(true);
+    try {
+      const params = {};
+      if (activeFilters.city.trim()) params.city = activeFilters.city.trim();
+      if (activeFilters.maxPrice !== "") params.maxPrice = activeFilters.maxPrice;
+      if (activeFilters.type !== "All") params.type = activeFilters.type;
 
-    fetchProperties();
+      const response = await axios.get("http://localhost:5000/api/properties", { params });
+      setProperties(response.data);
+    } catch (error) {
+      console.error("failed to fetch properties", error);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
+  // Initial load
+  useEffect(() => {
+    fetchProperties(filters);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Debounce filter changes: wait 400 ms after the last keystroke before hitting the API.
   useEffect(() => {
     setCurrentPage(1);
-  }, [filters]);
+    const timer = setTimeout(() => fetchProperties(filters), 400);
+    return () => clearTimeout(timer);
+  }, [filters, fetchProperties]);
 
-  // Keep the JWT attached to every axios request while logged in so the
-  // backend can authorize admin-only actions (publish/edit/delete).
+  // Keep JWT attached to every axios request while logged in.
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -71,26 +80,16 @@ function App() {
     }
   }, [currentUser]);
 
-  // Only admins may use the CRUD features.
   const isAdmin = currentUser?.role === "Admin";
 
   const handleDelete = async (propertyId) => {
-    const isConfirmed = window.confirm(
-      "Are you sure you want to delete this property?",
-    );
-    if (isConfirmed) {
-      try {
-        await axios.delete(
-          `http://localhost:5000/api/properties/${propertyId}`,
-        );
-        const updatedProperties = properties.filter(
-          (property) => property._id !== propertyId,
-        );
-        setProperties(updatedProperties);
-      } catch (error) {
-        console.error("Error deleting property:", error);
-        alert("Could not delete property. Please try again.");
-      }
+    if (!window.confirm("Are you sure you want to delete this property?")) return;
+    try {
+      await axios.delete(`http://localhost:5000/api/properties/${propertyId}`);
+      setProperties((prev) => prev.filter((p) => p._id !== propertyId));
+    } catch (error) {
+      console.error("Error deleting property:", error);
+      alert("Could not delete property. Please try again.");
     }
   };
 
@@ -100,10 +99,8 @@ function App() {
         `http://localhost:5000/api/properties/${editingProperty._id}`,
         updatedData,
       );
-      setProperties(
-        properties.map((p) =>
-          p._id === editingProperty._id ? response.data : p,
-        ),
+      setProperties((prev) =>
+        prev.map((p) => (p._id === editingProperty._id ? response.data : p)),
       );
       alert("Property updated successfully!");
       setEditingProperty(null);
@@ -113,23 +110,13 @@ function App() {
     }
   };
 
-  const handleCancelEdit = () => {
-    setEditingProperty(null);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setCurrentUser(null);
-  };
-
   const handleAddProperty = async (newPropertyData) => {
     try {
       const response = await axios.post(
         "http://localhost:5000/api/properties",
         newPropertyData,
       );
-      setProperties([response.data, ...properties]);
+      setProperties((prev) => [response.data, ...prev]);
       alert("Property added successfully!");
       setIsModalOpen(false);
     } catch (error) {
@@ -138,49 +125,27 @@ function App() {
     }
   };
 
-  const handlePublishToTwitter = async (property) => {
-    try {
-      const response = await axios.post(
-        "http://localhost:5000/api/social/twitter",
-        property,
-      );
-      alert(`Published to Twitter!\n${response.data.url || ""}`);
-    } catch (error) {
-      const data = error.response?.data;
-      if (data?.previewText) {
-        // Credentials not configured — show what would have been posted.
-        alert(
-          `Twitter is not connected yet. Preview of the tweet:\n\n${data.previewText}`,
-        );
-      } else {
-        console.error("Failed to publish to Twitter:", error);
-        alert("Could not publish to Twitter. Check server console.");
-      }
-    }
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setCurrentUser(null);
   };
 
-  const filteredProperties = properties.filter((property) => {
-    const matchesCity = property.city
-      .toLowerCase()
-      .includes(filters.city.toLowerCase());
+  const handlePublishToTwitter = (property) => {
+    const text = [
+      `🏠 New listing: ${property.type} in ${property.city}`,
+      `💰 ₪${property.price?.toLocaleString()} · ${property.rooms} rooms · ${property.size} sqm`,
+      `📍 ${property.street}, ${property.city}`,
+      `#RealEstate #${property.city.replace(/\s+/g, "")}`,
+    ].join("\n");
 
-    const matchesPrice =
-      filters.maxPrice === ""
-        ? true
-        : property.price <= Number(filters.maxPrice);
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
 
-    const matchesType =
-      filters.type === "All" ? true : property.type === filters.type;
-
-    return matchesCity && matchesPrice && matchesType;
-  });
-
-  const indexOfLastProperty = currentPage * propertiesPerPage;
-  const indexOfFirstProperty = indexOfLastProperty - propertiesPerPage;
-  const currentProperties = filteredProperties.slice(
-    indexOfFirstProperty,
-    indexOfLastProperty,
-  );
+  const indexOfLast = currentPage * propertiesPerPage;
+  const indexOfFirst = indexOfLast - propertiesPerPage;
+  const currentProperties = properties.slice(indexOfFirst, indexOfLast);
 
   return (
     <div className="app-container">
@@ -192,22 +157,19 @@ function App() {
               <span className="user-greeting">
                 Hi, {currentUser.firstName} ({currentUser.role})
               </span>
+              <button className="register-btn" onClick={() => setIsProfileOpen(true)}>
+                Edit Profile
+              </button>
               <button className="register-btn" onClick={handleLogout}>
                 Sign Out
               </button>
             </>
           ) : (
             <>
-              <button
-                className="register-btn"
-                onClick={() => setIsLoginOpen(true)}
-              >
+              <button className="register-btn" onClick={() => setIsLoginOpen(true)}>
                 Sign In
               </button>
-              <button
-                className="register-btn"
-                onClick={() => setIsRegisterOpen(true)}
-              >
+              <button className="register-btn" onClick={() => setIsRegisterOpen(true)}>
                 Register
               </button>
             </>
@@ -224,17 +186,35 @@ function App() {
       {isLoginOpen && (
         <LoginModal
           onClose={() => setIsLoginOpen(false)}
-          onLoggedIn={setCurrentUser}
+          onLoggedIn={(user) => {
+            setCurrentUser(user);
+            setIsLoginOpen(false);
+          }}
+        />
+      )}
+
+      {isProfileOpen && currentUser && (
+        <UserProfileModal
+          user={currentUser}
+          onClose={() => setIsProfileOpen(false)}
+          onUpdated={(updated) => {
+            setCurrentUser(updated);
+            setIsProfileOpen(false);
+          }}
+        />
+      )}
+
+      {inquiryProperty && (
+        <InquiryModal
+          property={inquiryProperty}
+          onClose={() => setInquiryProperty(null)}
         />
       )}
 
       {isModalOpen && (
         <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="close-modal-btn"
-              onClick={() => setIsModalOpen(false)}
-            >
+            <button className="close-modal-btn" onClick={() => setIsModalOpen(false)}>
               ✖
             </button>
             <AddPropertyForm onAdd={handleAddProperty} />
@@ -243,21 +223,18 @@ function App() {
       )}
 
       {editingProperty && (
-        <div
-          className="modal-overlay"
-          onClick={() => setEditingProperty(null)}
-        >
-          <div className="modal-content edit-modal-content" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="close-modal-btn"
-              onClick={handleCancelEdit}
-            >
+        <div className="modal-overlay" onClick={() => setEditingProperty(null)}>
+          <div
+            className="modal-content edit-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button className="close-modal-btn" onClick={() => setEditingProperty(null)}>
               ✖
             </button>
             <EditPropertyForm
               property={editingProperty}
               onSave={handleEditProperty}
-              onCancel={handleCancelEdit}
+              onCancel={() => setEditingProperty(null)}
             />
           </div>
         </div>
@@ -269,10 +246,7 @@ function App() {
             className="modal-content location-modal"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              className="close-modal-btn"
-              onClick={() => setLocationProperty(null)}
-            >
+            <button className="close-modal-btn" onClick={() => setLocationProperty(null)}>
               ✖
             </button>
             <h2>
@@ -310,12 +284,15 @@ function App() {
         </button>
       )}
 
-      {!isLoading && properties.length > 0 && (
+      {/* Charts and Admin Panel are visible to admins only */}
+      {isAdmin && !isLoading && properties.length > 0 && (
         <section className="charts-section" aria-label="Listings analytics">
           <PriceByCityChart properties={properties} />
           <PropertyTypePieChart properties={properties} />
         </section>
       )}
+
+      {isAdmin && <AdminPanel currentUser={currentUser} onUserDeleted={() => {}} />}
 
       {/* Shared tooltip layer used by the D3 charts */}
       <div className="chart-tooltip" />
@@ -323,11 +300,11 @@ function App() {
       <section className="listings-section" aria-label="Property listings">
         {isLoading ? (
           <div className="loading-message">
-            <h2>Loading properties... ⏳</h2>
+            <h2>Loading properties… ⏳</h2>
           </div>
         ) : (
           <div className="properties-grid">
-            {currentProperties && currentProperties.length > 0 ? (
+            {currentProperties.length > 0 ? (
               currentProperties.map((item) => (
                 <PropertyCard
                   key={item._id}
@@ -336,6 +313,7 @@ function App() {
                   onEdit={setEditingProperty}
                   onViewLocation={setLocationProperty}
                   onPublish={handlePublishToTwitter}
+                  onInquire={setInquiryProperty}
                   canManage={isAdmin}
                 />
               ))
@@ -347,7 +325,7 @@ function App() {
 
         <Pagination
           propertiesPerPage={propertiesPerPage}
-          totalProperties={filteredProperties.length}
+          totalProperties={properties.length}
           paginate={setCurrentPage}
           currentPage={currentPage}
         />
@@ -355,7 +333,6 @@ function App() {
 
       <aside className="features-aside" aria-label="Why choose us">
         <h3>Why choose us</h3>
-        {/* multiple-columns: the feature list flows across CSS columns */}
         <ul className="feature-list">
           <li>Verified listings</li>
           <li>Sketch your floor plan</li>

@@ -9,9 +9,6 @@ const EMPTY_FORM = {
   phone: "",
   password: "",
   role: "Buyer",
-  agencyName: "",
-  licenseNumber: "",
-  officeAddress: "",
 };
 
 const RegistrationModal = ({ onClose, onRegistered }) => {
@@ -20,23 +17,9 @@ const RegistrationModal = ({ onClose, onRegistered }) => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
-  const isAgency = formData.role === "Agency";
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleRoleSelect = (role) => {
-    // Clear agency-only fields when switching back to Buyer so we never
-    // submit stale data the backend would otherwise validate.
-    setFormData((prev) => ({
-      ...prev,
-      role,
-      ...(role === "Buyer"
-        ? { agencyName: "", licenseNumber: "", officeAddress: "" }
-        : {}),
-    }));
   };
 
   const handleSubmit = async (e) => {
@@ -78,23 +61,6 @@ const RegistrationModal = ({ onClose, onRegistered }) => {
 
         <form onSubmit={handleSubmit} className="registration-form">
           <h3 className="registration-title">Create Your Account</h3>
-
-          <div className="role-toggle" role="group" aria-label="Account type">
-            <button
-              type="button"
-              className={`role-option ${!isAgency ? "active" : ""}`}
-              onClick={() => handleRoleSelect("Buyer")}
-            >
-              🏠 Buyer
-            </button>
-            <button
-              type="button"
-              className={`role-option ${isAgency ? "active" : ""}`}
-              onClick={() => handleRoleSelect("Agency")}
-            >
-              🏢 Agency
-            </button>
-          </div>
 
           <div className="form-row">
             <input
@@ -139,41 +105,6 @@ const RegistrationModal = ({ onClose, onRegistered }) => {
             minLength={6}
             required
           />
-
-          {/* Agency-only fields: collapsed for Buyers, revealed with a
-              CSS transition when the Agency role is selected. */}
-          <div
-            className={`agency-fields ${isAgency ? "open" : ""}`}
-            aria-hidden={!isAgency}
-          >
-            <input
-              type="text"
-              name="agencyName"
-              placeholder="Agency name"
-              value={formData.agencyName}
-              onChange={handleChange}
-              required={isAgency}
-              disabled={!isAgency}
-            />
-            <input
-              type="text"
-              name="licenseNumber"
-              placeholder="License number"
-              value={formData.licenseNumber}
-              onChange={handleChange}
-              required={isAgency}
-              disabled={!isAgency}
-            />
-            <input
-              type="text"
-              name="officeAddress"
-              placeholder="Office address"
-              value={formData.officeAddress}
-              onChange={handleChange}
-              required={isAgency}
-              disabled={!isAgency}
-            />
-          </div>
 
           {error && <p className="form-error">⚠️ {error}</p>}
           {success && (

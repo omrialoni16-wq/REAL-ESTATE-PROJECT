@@ -37,17 +37,18 @@ const PropertyMap = ({ lat, lng, address, label = "Property location" }) => {
     setCenter(null);
     setError("");
 
-    axios
-      .get("http://localhost:5000/api/external/geocode", {
-        params: { q: address },
-      })
-      .then((res) => {
+    const geocode = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/external/geocode", {
+          params: { q: address },
+        });
         if (!cancelled) setCenter([res.data.latitude, res.data.longitude]);
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error("Failed to geocode address", err);
         if (!cancelled) setError(`Could not locate "${address}" on the map.`);
-      });
+      }
+    };
+    geocode();
 
     return () => {
       cancelled = true;

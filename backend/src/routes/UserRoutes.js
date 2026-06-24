@@ -5,18 +5,17 @@ import {
   getUser,
   editUser,
   removeUser,
-  subscribeAgency,
-  unsubscribeAgency,
+  createAdmin,
 } from "../controllers/UserController.js";
+import { protect, requireAdmin, requireSelfOrAdmin } from "../middleware/AuthMiddleware.js";
 
 const router = express.Router();
 
 router.post("/api/users", addUser);
 router.get("/api/users", getAllUsers);
 router.get("/api/users/:id", getUser);
-router.put("/api/users/:id", editUser);
-router.delete("/api/users/:id", removeUser);
-router.post("/api/users/:buyerId/follow/:agencyId", subscribeAgency);
-router.post("/api/users/:buyerId/unfollow/:agencyId", unsubscribeAgency);
+router.put("/api/users/:id", protect, requireSelfOrAdmin, editUser);   // own profile or admin
+router.delete("/api/users/:id", protect, requireAdmin, removeUser);    // admin only
+router.post("/api/admin", protect, requireAdmin, createAdmin);         // admin creates another admin
 
 export default router;

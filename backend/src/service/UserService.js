@@ -21,7 +21,7 @@ export const fetchUserById = async (id) => {
     throw new Error("Invalid user ID.");
   }
 
-  return await User.findById(id).populate("followers following", "firstName lastName email role agencyName");
+  return await User.findById(id);
 };
 
 export const updateUser = async (id, userData) => {
@@ -32,7 +32,7 @@ export const updateUser = async (id, userData) => {
   return await User.findByIdAndUpdate(id, userData, {
     new: true,
     runValidators: true,
-  }).populate("followers following", "firstName lastName email role agencyName");
+  });
 };
 
 export const deleteUser = async (id) => {
@@ -43,64 +43,3 @@ export const deleteUser = async (id) => {
   return await User.findByIdAndDelete(id);
 };
 
-export const followAgency = async (buyerId, agencyId) => {
-  if (!validateObjectId(buyerId) || !validateObjectId(agencyId)) {
-    throw new Error("Invalid buyer or agency ID.");
-  }
-
-  if (buyerId === agencyId) {
-    throw new Error("A user cannot follow themselves.");
-  }
-
-  const buyer = await User.findById(buyerId);
-  const agency = await User.findById(agencyId);
-
-  if (!buyer || !agency) {
-    throw new Error("Buyer or agency user not found.");
-  }
-
-  if (buyer.role !== "Buyer") {
-    throw new Error("Only buyers can follow agencies.");
-  }
-
-  if (agency.role !== "Agency") {
-    throw new Error("Can only follow users with the Agency role.");
-  }
-
-  if (buyer.following.includes(agencyId)) {
-    return { buyer, agency };
-  }
-
-  buyer.following.push(agencyId);
-  agency.followers.push(buyerId);
-
-  await Promise.all([buyer.save(), agency.save()]);
-  return { buyer, agency };
-};
-
-export const unfollowAgency = async (buyerId, agencyId) => {
-  if (!validateObjectId(buyerId) || !validateObjectId(agencyId)) {
-    throw new Error("Invalid buyer or agency ID.");
-  }
-
-  const buyer = await User.findById(buyerId);
-  const agency = await User.findById(agencyId);
-
-  if (!buyer || !agency) {
-    throw new Error("Buyer or agency user not found.");
-  }
-
-  if (buyer.role !== "Buyer") {
-    throw new Error("Only buyers can unfollow agencies.");
-  }
-
-  buyer.following = buyer.following.filter(
-    (followedAgencyId) => followedAgencyId.toString() !== agencyId,
-  );
-  agency.followers = agency.followers.filter(
-    (followerId) => followerId.toString() !== buyerId,
-  );
-
-  await Promise.all([buyer.save(), agency.save()]);
-  return { buyer, agency };
-};

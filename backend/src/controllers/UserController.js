@@ -4,8 +4,6 @@ import {
   fetchUserById,
   updateUser,
   deleteUser,
-  followAgency,
-  unfollowAgency,
 } from "../service/UserService.js";
 
 const handleControllerError = (res, error, fallbackMessage, status = 500) => {
@@ -74,22 +72,18 @@ export const removeUser = async (req, res) => {
   }
 };
 
-export const subscribeAgency = async (req, res) => {
+export const createAdmin = async (req, res) => {
   try {
-    const { buyerId, agencyId } = req.params;
-    const result = await followAgency(buyerId, agencyId);
-    return res.status(200).json(result);
+    const { firstName, lastName, email, password, phone } = req.body;
+    if (!firstName || !lastName || !email || !password) {
+      return res.status(400).json({ message: "firstName, lastName, email and password are required." });
+    }
+    const user = await createUser({ firstName, lastName, email, password, phone: phone || "", role: "Admin" });
+    const safeUser = user.toObject();
+    delete safeUser.password;
+    return res.status(201).json(safeUser);
   } catch (error) {
-    return handleControllerError(res, error, "Failed to subscribe to agency.");
+    return handleControllerError(res, error, "Failed to create admin.");
   }
 };
 
-export const unsubscribeAgency = async (req, res) => {
-  try {
-    const { buyerId, agencyId } = req.params;
-    const result = await unfollowAgency(buyerId, agencyId);
-    return res.status(200).json(result);
-  } catch (error) {
-    return handleControllerError(res, error, "Failed to unsubscribe from agency.");
-  }
-};

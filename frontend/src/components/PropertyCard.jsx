@@ -6,6 +6,7 @@ const PropertyCard = ({
   onEdit,
   onViewLocation,
   onPublish,
+  onInquire,
   canManage = false,
 }) => {
   return (
@@ -38,6 +39,16 @@ const PropertyCard = ({
           </button>
           <button className="publish-btn" onClick={() => onPublish(property)}>
             𝕏 Publish
+          </button>
+        </div>
+
+        <div className="card-actions">
+          <button
+            className="location-btn"
+            style={{ borderColor: "rgba(155,89,182,0.8)", color: "#6c3483" }}
+            onClick={() => onInquire(property)}
+          >
+            ✉️ Contact Agent
           </button>
         </div>
 

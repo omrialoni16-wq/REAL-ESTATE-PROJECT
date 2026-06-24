@@ -1,6 +1,5 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
-import Property from "../models/Property.js";
 
 // Verifies the Bearer JWT and attaches { id, role } to req.user.
 // Blocks every unauthenticated request to the main app.
@@ -31,19 +30,6 @@ export const protect = async (req, res, next) => {
   }
 };
 
-// Allows only Agency accounts (e.g. publishing properties).
-export const requireAgency = (req, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ message: "Not authenticated." });
-  }
-  if (req.user.role !== "Agency") {
-    return res
-      .status(403)
-      .json({ message: "Only Agency accounts can perform this action." });
-  }
-  return next();
-};
-
 // Allows only Admin accounts (e.g. managing property listings).
 export const requireAdmin = (req, res, next) => {
   if (!req.user) {
@@ -57,26 +43,14 @@ export const requireAdmin = (req, res, next) => {
   return next();
 };
 
-// Ensures the authenticated Agency owns the property it tries to
-// edit/delete. Loads the property once and caches it on the request.
-export const requirePropertyOwnership = async (req, res, next) => {
-  try {
-    const property = await Property.findById(req.params.id).select("listedBy");
-    if (!property) {
-      return res.status(404).json({ message: "Property not found." });
-    }
-
-    if (!property.listedBy || property.listedBy.toString() !== req.user.id) {
-      return res
-        .status(403)
-        .json({ message: "You can only modify your own properties." });
-    }
-
-    req.property = property;
-    return next();
-  } catch (error) {
-    return res
-      .status(400)
-      .json({ message: "Ownership check failed.", error: error.message });
+// Allows a user to modify their own account, or an admin to modify any account.
+export const requireSelfOrAdmin = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "Not authenticated." });
   }
+  if (req.user.role === "Admin" || req.params.id === req.user.id) {
+    return next();
+  }
+  return res.status(403).json({ message: "You can only modify your own account." });
 };
+

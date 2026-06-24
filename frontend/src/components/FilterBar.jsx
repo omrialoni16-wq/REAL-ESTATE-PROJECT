@@ -33,9 +33,11 @@ const FilterBar = ({ filters, setFilters }) => {
         className="filter-input"
       >
         <option value="All">All Types</option>
-        <option value="דירה">Apartment (דירה)</option>
-        <option value="פנטהאוז">Penthouse</option>
-        <option value="בית">House</option>
+        <option value="Apartment">Apartment</option>
+        <option value="Penthouse">Penthouse</option>
+        <option value="House">House</option>
+        <option value="Duplex">Duplex</option>
+        <option value="Studio">Studio</option>
       </select>
     </div>
   );

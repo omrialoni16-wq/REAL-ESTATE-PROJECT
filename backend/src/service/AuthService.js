@@ -23,11 +23,6 @@ const sanitizeUser = (userDoc) => {
   return user;
 };
 
-// Fields that only apply to (and are required for) an Agency account.
-const AGENCY_FIELDS = ["agencyName", "licenseNumber", "officeAddress"];
-
-// Registration accepts a dynamic payload: the agency-only fields are
-// required when role === "Agency" and ignored otherwise.
 export const registerUser = async (payload) => {
   if (!payload || typeof payload !== "object") {
     throw new Error("Registration data must be a valid object.");
@@ -41,8 +36,8 @@ export const registerUser = async (payload) => {
     );
   }
 
-  if (!["Buyer", "Agency"].includes(role)) {
-    throw new Error('Role must be either "Buyer" or "Agency".');
+  if (role !== "Buyer") {
+    throw new Error('Only "Buyer" accounts can be registered.');
   }
 
   const existing = await User.findOne({ email: email.toLowerCase().trim() });
@@ -50,23 +45,7 @@ export const registerUser = async (payload) => {
     throw new Error("An account with this email already exists.");
   }
 
-  const userData = { firstName, lastName, email, phone, password, role };
-
-  // Conditional validation: only an Agency carries the agency fields.
-  if (role === "Agency") {
-    const missing = AGENCY_FIELDS.filter((field) => !payload[field]);
-    if (missing.length > 0) {
-      throw new Error(
-        `Agency registration requires: ${missing.join(", ")}.`,
-      );
-    }
-    AGENCY_FIELDS.forEach((field) => {
-      userData[field] = payload[field];
-    });
-  }
-
-  // Password is hashed by the User model's pre-save hook.
-  const user = await new User(userData).save();
+  const user = await new User({ firstName, lastName, email, phone, password, role }).save();
   const token = generateToken(user);
 
   return { user: sanitizeUser(user), token };

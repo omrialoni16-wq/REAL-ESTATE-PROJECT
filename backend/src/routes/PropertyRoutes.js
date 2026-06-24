@@ -9,7 +9,6 @@ import {
   searchByBudgetSpace,
   getStatsAveragePriceByCity,
   getStatsCountByType,
-  getFeed,
 } from "../controllers/propertyController.js";
 import { protect, requireAdmin } from "../middleware/AuthMiddleware.js";
 
@@ -22,7 +21,6 @@ router.get("/api/properties/search", searchByLocationBudget);
 router.get("/api/properties/search/space", searchByBudgetSpace);
 router.get("/api/properties/stats/price-by-city", getStatsAveragePriceByCity);
 router.get("/api/properties/stats/count-by-type", getStatsCountByType);
-router.get("/api/properties/feed/:buyerId", getFeed); // buyer's personalized feed
 
 router.get("/api/properties", getAllProperties);
 router.get("/api/properties/:id", getProperty);

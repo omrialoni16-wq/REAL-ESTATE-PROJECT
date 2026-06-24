@@ -35,41 +35,8 @@ export const userSchema = new mongoose.Schema(
     role: {
       type: String,
       required: [true, "Role is required"],
-      enum: ["Buyer", "Agency", "Admin"],
+      enum: ["Buyer", "Admin"],
     },
-    agencyName: {
-      type: String,
-      required: function () {
-        return this.role === "Agency";
-      },
-      trim: true,
-    },
-    licenseNumber: {
-      type: String,
-      required: function () {
-        return this.role === "Agency";
-      },
-      trim: true,
-    },
-    officeAddress: {
-      type: String,
-      required: function () {
-        return this.role === "Agency";
-      },
-      trim: true,
-    },
-    followers: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "users",
-      },
-    ],
-    following: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "users",
-      },
-    ],
   },
   { timestamps: true },
 );

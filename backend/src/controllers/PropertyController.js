@@ -8,7 +8,6 @@ import {
   searchPropertiesByBudgetAndSpace,
   getAveragePriceByCity,
   getPropertyCountByType,
-  getBuyerFeed,
 } from "../service/PropertyService.js";
 
 export const addProperty = async (req, res) => {
@@ -32,7 +31,8 @@ export const addProperty = async (req, res) => {
 
 export const getAllProperties = async (req, res) => {
   try {
-    const properties = await fetchAllProperties();
+    const { city, maxPrice, type } = req.query;
+    const properties = await fetchAllProperties({ city, maxPrice, type });
     res.status(200).json(properties);
   } catch (error) {
     console.error("Error getting all properties:", error);
@@ -139,13 +139,3 @@ export const getStatsCountByType = async (req, res) => {
   }
 };
 
-// The Feed — listings from agencies the given buyer follows.
-export const getFeed = async (req, res) => {
-  try {
-    const feed = await getBuyerFeed(req.params.buyerId);
-    res.status(200).json({ count: feed.length, results: feed });
-  } catch (error) {
-    console.error("Error building feed:", error);
-    res.status(400).json({ message: "Failed to load feed.", error: error.message });
-  }
-};

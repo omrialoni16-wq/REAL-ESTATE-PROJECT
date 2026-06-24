@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import Property from "../models/Property.js";
-import User from "../models/User.js";
 
 const validateObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 
@@ -13,8 +12,16 @@ export const createProperty = async (propertyData) => {
   return await newProperty.save();
 };
 
-export const fetchAllProperties = async () => {
-  return await Property.find().sort({ createdAt: -1 }).limit(600).populate("listedBy", "firstName lastName agencyName role");
+export const fetchAllProperties = async ({ city, maxPrice, type } = {}) => {
+  const filter = {};
+  if (city && city.trim()) filter.city = new RegExp(city.trim(), "i");
+  if (maxPrice && maxPrice !== "") filter.price = { $lte: Number(maxPrice) };
+  if (type && type !== "All") filter.type = type;
+
+  return await Property.find(filter)
+    .sort({ createdAt: -1 })
+    .limit(600)
+    .populate("listedBy", "firstName lastName role");
 };
 
 export const fetchPropertyById = async (id) => {
@@ -22,7 +29,7 @@ export const fetchPropertyById = async (id) => {
     throw new Error("Invalid property ID.");
   }
 
-  return await Property.findById(id).populate("listedBy", "firstName lastName agencyName role");
+  return await Property.findById(id).populate("listedBy", "firstName lastName role");
 };
 
 export const updateProperty = async (id, propertyData) => {
@@ -33,7 +40,7 @@ export const updateProperty = async (id, propertyData) => {
   return await Property.findByIdAndUpdate(id, propertyData, {
     new: true,
     runValidators: true,
-  }).populate("listedBy", "firstName lastName agencyName role");
+  }).populate("listedBy", "firstName lastName role");
 };
 
 export const deleteProperty = async (id) => {
@@ -74,7 +81,7 @@ export const searchPropertiesByLocationBudget = async ({
   return await Property.find(filter)
     .sort({ price: 1 })
     .limit(200)
-    .populate("listedBy", "firstName lastName agencyName role");
+    .populate("listedBy", "firstName lastName role");
 };
 
 // Search #2: by price range and minimum size (+ optional listing tier).
@@ -101,7 +108,7 @@ export const searchPropertiesByBudgetAndSpace = async ({
   return await Property.find(filter)
     .sort({ size: -1 })
     .limit(200)
-    .populate("listedBy", "firstName lastName agencyName role");
+    .populate("listedBy", "firstName lastName role");
 };
 
 /* --------------------------------------------------------------------------
@@ -158,32 +165,3 @@ export const getPropertyCountByType = async () => {
   ]);
 };
 
-/* --------------------------------------------------------------------------
- * THE FEED — properties from agencies a buyer follows
- * ------------------------------------------------------------------------ */
-
-// Personalized feed: newest properties listed exclusively by the
-// agencies this buyer has subscribed to/followed.
-export const getBuyerFeed = async (buyerId) => {
-  if (!validateObjectId(buyerId)) {
-    throw new Error("Invalid buyer ID.");
-  }
-
-  const buyer = await User.findById(buyerId).select("role following");
-  if (!buyer) {
-    throw new Error("Buyer not found.");
-  }
-  if (buyer.role !== "Buyer") {
-    throw new Error("Only buyers have a personalized feed.");
-  }
-
-  // No subscriptions yet → empty feed.
-  if (!buyer.following || buyer.following.length === 0) {
-    return [];
-  }
-
-  return await Property.find({ listedBy: { $in: buyer.following } })
-    .sort({ createdAt: -1 })
-    .limit(100)
-    .populate("listedBy", "firstName lastName agencyName role");
-};
