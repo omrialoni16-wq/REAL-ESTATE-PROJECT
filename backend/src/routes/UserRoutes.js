@@ -12,7 +12,7 @@ import { protect, requireAdmin, requireSelfOrAdmin } from "../middleware/AuthMid
 const router = express.Router();
 
 router.post("/api/users", addUser);
-router.get("/api/users", getAllUsers);
+router.get("/api/users",protect, requireAdmin, getAllUsers);
 router.get("/api/users/:id", getUser);
 router.put("/api/users/:id", protect, requireSelfOrAdmin, editUser);   // own profile or admin
 router.delete("/api/users/:id", protect, requireAdmin, removeUser);    // admin only

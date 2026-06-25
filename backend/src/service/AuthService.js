@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "1h";
 
 // Sign a short JWT carrying the user id and role so middleware can
 // authorize without an extra DB read on every request.
@@ -22,6 +22,7 @@ const sanitizeUser = (userDoc) => {
   delete user.password;
   return user;
 };
+
 
 export const registerUser = async (payload) => {
   if (!payload || typeof payload !== "object") {

@@ -8,6 +8,7 @@ import userRoutes from "./src/routes/UserRoutes.js";
 import inquiryRoutes from "./src/routes/InquiryRoutes.js";
 import externalApiRoutes from "./src/routes/ExternalApiRoutes.js";
 import socialRoutes from "./src/routes/SocialRoutes.js";
+import { requireAdmin } from "./src/middleware/AuthMiddleware.js";
 
 const app = express();
 
