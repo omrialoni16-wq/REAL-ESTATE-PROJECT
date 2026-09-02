@@ -39,7 +39,7 @@ const PropertyMap = ({ lat, lng, address, label = "Property location" }) => {
 
     const geocode = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/external/geocode", {
+        const res = await axios.get("http://localhost:5050/api/external/geocode", {
           params: { q: address },
         });
         if (!cancelled) setCenter([res.data.latitude, res.data.longitude]);

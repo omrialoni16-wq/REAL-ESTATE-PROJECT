@@ -436,69 +436,10 @@ h1 {
   transform: translateY(-2px);
 }
 
-.features-aside {
-  background: #ffffff;
-  border-radius: 14px;
-  padding: 20px 25px;
-  margin: 40px 0;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-}
-
-.features-aside h3 {
-  margin-top: 0;
-  color: #2c3e50;
-}
-
-/* multiple-columns: feature list flows across responsive columns */
-.feature-list {
-  column-count: 3;
-  column-gap: 30px;
-  list-style: square;
-  padding-left: 20px;
-  margin: 0;
-  color: #34495e;
-}
-
-.feature-list li {
-  break-inside: avoid;
-  margin-bottom: 8px;
-}
-
-.media-section {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 30px;
-  margin: 40px 0;
-}
-
-.media-block {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 25px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-}
-
-.media-block h2 {
-  margin-top: 0;
-  color: #2c3e50;
-  text-shadow: 0 2px 6px rgba(44, 62, 80, 0.15);
-}
-
-.media-hint {
-  color: #7f8c8d;
-  margin-top: 0;
-}
-
 .app-footer {
   text-align: center;
   color: #7f8c8d;
   padding: 30px 0 10px;
   border-top: 1px solid #ecf0f1;
   margin-top: 40px;
-}
-
-@media (max-width: 768px) {
-  .feature-list {
-    column-count: 1;
-  }
 }

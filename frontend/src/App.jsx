@@ -8,7 +8,6 @@ import LoginModal from "./components/LoginModal";
 import InquiryModal from "./components/InquiryModal";
 import UserProfileModal from "./components/UserProfileModal";
 import AdminPanel from "./components/AdminPanel";
-import FloorPlanCanvas from "./components/FloorPlanCanvas";
 import PropertyMap from "./components/PropertyMap";
 import WeatherWidget from "./components/WeatherWidget";
 import PriceByCityChart from "./components/charts/PriceByCityChart";
@@ -48,7 +47,7 @@ function App() {
       if (activeFilters.maxPrice !== "") params.maxPrice = activeFilters.maxPrice;
       if (activeFilters.type !== "All") params.type = activeFilters.type;
 
-      const response = await axios.get("http://localhost:5000/api/properties", { params });
+      const response = await axios.get("http://localhost:5050/api/properties", { params });
       setProperties(response.data);
     } catch (error) {
       console.error("failed to fetch properties", error);
@@ -85,7 +84,7 @@ function App() {
   const handleDelete = async (propertyId) => {
     if (!window.confirm("Are you sure you want to delete this property?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/properties/${propertyId}`);
+      await axios.delete(`http://localhost:5050/api/properties/${propertyId}`);
       setProperties((prev) => prev.filter((p) => p._id !== propertyId));
     } catch (error) {
       console.error("Error deleting property:", error);
@@ -96,7 +95,7 @@ function App() {
   const handleEditProperty = async (updatedData) => {
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/properties/${editingProperty._id}`,
+        `http://localhost:5050/api/properties/${editingProperty._id}`,
         updatedData,
       );
       setProperties((prev) =>
@@ -113,7 +112,7 @@ function App() {
   const handleAddProperty = async (newPropertyData) => {
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/properties",
+        "http://localhost:5050/api/properties",
         newPropertyData,
       );
       setProperties((prev) => [response.data, ...prev]);
@@ -329,29 +328,6 @@ function App() {
           paginate={setCurrentPage}
           currentPage={currentPage}
         />
-      </section>
-
-      <aside className="features-aside" aria-label="Why choose us">
-        <h3>Why choose us</h3>
-        <ul className="feature-list">
-          <li>Verified listings</li>
-          <li>Sketch your floor plan</li>
-          <li>Trusted local agencies</li>
-          <li>No hidden fees</li>
-          <li>Fast mortgage support</li>
-          <li>Neighborhood insights</li>
-          <li>24/7 customer care</li>
-        </ul>
-      </aside>
-
-      <section className="media-section" aria-label="Property media tools">
-        <article className="media-block">
-          <h2>Sketch a Floor Plan</h2>
-          <p className="media-hint">
-            Draw a rough layout of your dream home below.
-          </p>
-          <FloorPlanCanvas />
-        </article>
       </section>
 
       <footer className="app-footer">

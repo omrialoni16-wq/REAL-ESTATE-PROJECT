@@ -17,7 +17,7 @@ const WeatherWidget = ({ city }) => {
       setStatus("loading");
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/external/weather`,
+          `http://localhost:5050/api/external/weather`,
           { params: { city } },
         );
         if (!cancelled) {

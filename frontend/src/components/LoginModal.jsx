@@ -21,7 +21,7 @@ const LoginModal = ({ onClose, onLoggedIn }) => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/login",
+        "http://localhost:5050/api/auth/login",
         formData,
       );
       // Persist the session so it survives a page refresh.

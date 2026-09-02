@@ -19,7 +19,7 @@ const InquiryModal = ({ property, onClose }) => {
     setError("");
     setSubmitting(true);
     try {
-      await axios.post("http://localhost:5000/api/inquiries", {
+      await axios.post("http://localhost:5050/api/inquiries", {
         ...form,
         propertyId: property._id,
       });
