@@ -1,4 +1,4 @@
-import "dotenv/config"; // must load env before the DB connections are created
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import connectDB from "./src/config/db.js";
@@ -17,14 +17,14 @@ app.use(express.json());
 
 connectDB();
 
-app.use(authRoutes); // public: /api/auth/register, /api/auth/login
+app.use(authRoutes);
 app.use(propertyRoutes);
 app.use(userRoutes);
 app.use(inquiryRoutes);
 app.use(externalApiRoutes);
 app.use(socialRoutes);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5050;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

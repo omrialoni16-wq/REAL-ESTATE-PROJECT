@@ -8,7 +8,6 @@ const FloorPlanCanvas = () => {
   const [strokeColor, setStrokeColor] = useState("#2c3e50");
   const [lineWidth, setLineWidth] = useState(3);
 
-  // Initialise the 2D context once the canvas is mounted.
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
@@ -17,14 +16,12 @@ const FloorPlanCanvas = () => {
     ctxRef.current = ctx;
   }, []);
 
-  // Keep the live stroke settings in sync with the context.
   useEffect(() => {
     if (!ctxRef.current) return;
     ctxRef.current.strokeStyle = strokeColor;
     ctxRef.current.lineWidth = lineWidth;
   }, [strokeColor, lineWidth]);
 
-  // Translate a mouse/touch event into canvas-local coordinates.
   const getCoords = (e) => {
     const rect = canvasRef.current.getBoundingClientRect();
     const point = e.touches ? e.touches[0] : e;

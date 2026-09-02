@@ -57,12 +57,6 @@ export const deleteProperty = async (id) => {
   }
 };
 
-/* --------------------------------------------------------------------------
- * ADVANCED SEARCH (each takes 3+ parameters, all optional & combinable)
- * ------------------------------------------------------------------------ */
-
-// Search #1: by location, budget and minimum rooms (+ optional type).
-// e.g. /api/properties/search?city=Tel Aviv&maxPrice=6000000&minRooms=3
 export const searchPropertiesByLocationBudget = async ({
   city,
   maxPrice,
@@ -84,8 +78,6 @@ export const searchPropertiesByLocationBudget = async ({
     .populate("listedBy", "firstName lastName role");
 };
 
-// Search #2: by price range and minimum size (+ optional listing tier).
-// e.g. /api/properties/search/space?minPrice=3000000&maxPrice=9000000&minSize=80
 export const searchPropertiesByBudgetAndSpace = async ({
   minPrice,
   maxPrice,
@@ -111,11 +103,6 @@ export const searchPropertiesByBudgetAndSpace = async ({
     .populate("listedBy", "firstName lastName role");
 };
 
-/* --------------------------------------------------------------------------
- * GROUP BY AGGREGATIONS
- * ------------------------------------------------------------------------ */
-
-// Aggregation #1: average / min / max price grouped by city.
 export const getAveragePriceByCity = async () => {
   return await Property.aggregate([
     {
@@ -141,7 +128,6 @@ export const getAveragePriceByCity = async () => {
   ]);
 };
 
-// Aggregation #2: total number of properties grouped by type.
 export const getPropertyCountByType = async () => {
   return await Property.aggregate([
     {

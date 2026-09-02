@@ -8,7 +8,7 @@ import {
 
 export const addInquiry = async (req, res) => {
   try {
-    // Attach the logged-in user's id when available so they can delete later.
+
     const data = {
       ...req.body,
       ...(req.user ? { submittedBy: req.user.id } : {}),
@@ -51,7 +51,6 @@ export const editInquiry = async (req, res) => {
   }
 };
 
-// Ownership rule: the submitter can delete their own inquiry; admins can delete any.
 export const removeInquiry = async (req, res) => {
   try {
     const inquiry = await fetchInquiryById(req.params.id);

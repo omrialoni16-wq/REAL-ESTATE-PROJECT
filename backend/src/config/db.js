@@ -1,8 +1,5 @@
 import mongoose from "mongoose";
 
-// Two separate databases:
-// - propertiesConnection: the existing cluster that holds all property listings.
-// - usersConnection: the new cluster where accounts (register/login) live.
 export const propertiesConnection = mongoose.createConnection(
   process.env.MONGO_URI_PROPERTIES,
 );

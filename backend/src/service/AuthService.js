@@ -3,8 +3,6 @@ import User from "../models/User.js";
 
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "1h";
 
-// Sign a short JWT carrying the user id and role so middleware can
-// authorize without an extra DB read on every request.
 export const generateToken = (user) => {
   if (!process.env.JWT_SECRET) {
     throw new Error("JWT_SECRET is not configured on the server.");
@@ -16,13 +14,11 @@ export const generateToken = (user) => {
   );
 };
 
-// Strip the password before sending a user object back to the client.
 const sanitizeUser = (userDoc) => {
   const user = userDoc.toObject ? userDoc.toObject() : { ...userDoc };
   delete user.password;
   return user;
 };
-
 
 export const registerUser = async (payload) => {
   if (!payload || typeof payload !== "object") {
@@ -52,13 +48,11 @@ export const registerUser = async (payload) => {
   return { user: sanitizeUser(user), token };
 };
 
-// Login verifies credentials and returns a fresh token.
 export const loginUser = async ({ email, password } = {}) => {
   if (!email || !password) {
     throw new Error("Email and password are required.");
   }
 
-  // password has select:false, so explicitly pull it for comparison.
   const user = await User.findOne({
     email: email.toLowerCase().trim(),
   }).select("+password");

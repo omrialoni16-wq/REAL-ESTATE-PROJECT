@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import "./WeatherWidget.css";
+import { API_URL } from "../config";
 
-// Shows live weather for a property's city. The data comes from our OWN backend
-// (/api/external/weather), which calls the third-party Open-Meteo service and
-// processes the response before returning it — see backend ExternalApiService.
 const WeatherWidget = ({ city }) => {
   const [weather, setWeather] = useState(null);
-  const [status, setStatus] = useState("loading"); // loading | done | error
+  const [status, setStatus] = useState("loading");
 
   useEffect(() => {
     if (!city) return;
@@ -17,7 +15,7 @@ const WeatherWidget = ({ city }) => {
       setStatus("loading");
       try {
         const res = await axios.get(
-          `http://localhost:5050/api/external/weather`,
+          `${API_URL}/api/external/weather`,
           { params: { city } },
         );
         if (!cancelled) {

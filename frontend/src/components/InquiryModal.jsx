@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import { API_URL } from "../config";
 
 const EMPTY = { name: "", email: "", phone: "", message: "" };
 
@@ -19,7 +20,7 @@ const InquiryModal = ({ property, onClose }) => {
     setError("");
     setSubmitting(true);
     try {
-      await axios.post("http://localhost:5050/api/inquiries", {
+      await axios.post(`${API_URL}/api/inquiries`, {
         ...form,
         propertyId: property._id,
       });

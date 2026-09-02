@@ -1,18 +1,8 @@
 import axios from "axios";
 
-// External Web Service integration.
-// Fetches LIVE weather for a property's city from the third-party Open-Meteo
-// service (no API key required), processes the raw response into a small,
-// frontend-friendly shape, and returns it. Swap the URLs/parsing here to use a
-// different provider (e.g. OpenWeatherMap) without touching the controller.
-
-// Nominatim (OpenStreetMap) handles city names in any language — including the
-// Hebrew names used in this project's data — whereas Open-Meteo's own geocoder
-// is Latin-only. It requires a descriptive User-Agent per its usage policy.
 const GEOCODE_URL = "https://nominatim.openstreetmap.org/search";
 const FORECAST_URL = "https://api.open-meteo.com/v1/forecast";
 
-// Open-Meteo "WMO weather interpretation codes" → human text + emoji icon.
 const WEATHER_CODES = {
   0: { description: "Clear sky", icon: "☀️" },
   1: { description: "Mainly clear", icon: "🌤️" },
@@ -40,8 +30,6 @@ const WEATHER_CODES = {
 const describeCode = (code) =>
   WEATHER_CODES[code] || { description: "Unknown", icon: "🌡️" };
 
-// Turn any free-text location (city, or "street, city") into coordinates.
-// Works for Hebrew or English. Used by both the weather and the map.
 export const geocodeLocation = async (query) => {
   if (!query || typeof query !== "string") {
     throw new Error("A location query is required.");
@@ -65,7 +53,6 @@ export const geocodeLocation = async (query) => {
   };
 };
 
-// Step 2: fetch + process current weather for a city.
 export const getWeatherByCity = async (city) => {
   if (!city || typeof city !== "string") {
     throw new Error("A 'city' query parameter is required.");
@@ -93,7 +80,6 @@ export const getWeatherByCity = async (city) => {
 
   const { description, icon } = describeCode(current.weathercode);
 
-  // Processed, trimmed-down payload for the frontend.
   return {
     city: place.name,
     country: place.country,

@@ -15,6 +15,7 @@ import PropertyTypePieChart from "./components/charts/PropertyTypePieChart";
 import "./App.css";
 import FilterBar from "./components/FilterBar";
 import Pagination from "./components/Pagination";
+import { API_URL } from "./config";
 
 function App() {
   const [properties, setProperties] = useState([]);
@@ -37,8 +38,6 @@ function App() {
   const [locationProperty, setLocationProperty] = useState(null);
   const [inquiryProperty, setInquiryProperty] = useState(null);
 
-  // Fetch properties from the backend, passing filters as query params so the
-  // DB does the filtering instead of the browser.
   const fetchProperties = useCallback(async (activeFilters) => {
     setIsLoading(true);
     try {
@@ -47,7 +46,7 @@ function App() {
       if (activeFilters.maxPrice !== "") params.maxPrice = activeFilters.maxPrice;
       if (activeFilters.type !== "All") params.type = activeFilters.type;
 
-      const response = await axios.get("http://localhost:5050/api/properties", { params });
+      const response = await axios.get(`${API_URL}/api/properties`, { params });
       setProperties(response.data);
     } catch (error) {
       console.error("failed to fetch properties", error);
@@ -56,20 +55,17 @@ function App() {
     }
   }, []);
 
-  // Initial load
   useEffect(() => {
     fetchProperties(filters);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, []);
 
-  // Debounce filter changes: wait 400 ms after the last keystroke before hitting the API.
   useEffect(() => {
     setCurrentPage(1);
     const timer = setTimeout(() => fetchProperties(filters), 400);
     return () => clearTimeout(timer);
   }, [filters, fetchProperties]);
 
-  // Keep JWT attached to every axios request while logged in.
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -84,7 +80,7 @@ function App() {
   const handleDelete = async (propertyId) => {
     if (!window.confirm("Are you sure you want to delete this property?")) return;
     try {
-      await axios.delete(`http://localhost:5050/api/properties/${propertyId}`);
+      await axios.delete(`${API_URL}/api/properties/${propertyId}`);
       setProperties((prev) => prev.filter((p) => p._id !== propertyId));
     } catch (error) {
       console.error("Error deleting property:", error);
@@ -95,7 +91,7 @@ function App() {
   const handleEditProperty = async (updatedData) => {
     try {
       const response = await axios.put(
-        `http://localhost:5050/api/properties/${editingProperty._id}`,
+        `${API_URL}/api/properties/${editingProperty._id}`,
         updatedData,
       );
       setProperties((prev) =>
@@ -112,7 +108,7 @@ function App() {
   const handleAddProperty = async (newPropertyData) => {
     try {
       const response = await axios.post(
-        "http://localhost:5050/api/properties",
+        `${API_URL}/api/properties`,
         newPropertyData,
       );
       setProperties((prev) => [response.data, ...prev]);
@@ -283,7 +279,6 @@ function App() {
         </button>
       )}
 
-      {/* Charts and Admin Panel are visible to admins only */}
       {isAdmin && !isLoading && properties.length > 0 && (
         <section className="charts-section" aria-label="Listings analytics">
           <PriceByCityChart properties={properties} />
@@ -293,7 +288,6 @@ function App() {
 
       {isAdmin && <AdminPanel currentUser={currentUser} onUserDeleted={() => {}} />}
 
-      {/* Shared tooltip layer used by the D3 charts */}
       <div className="chart-tooltip" />
 
       <section className="listings-section" aria-label="Property listings">

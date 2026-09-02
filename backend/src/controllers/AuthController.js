@@ -26,7 +26,6 @@ export const login = async (req, res) => {
   }
 };
 
-// Returns the currently authenticated user (req.user set by `protect`).
 export const getMe = async (req, res) => {
   try {
     const user = await fetchUserById(req.user.id);

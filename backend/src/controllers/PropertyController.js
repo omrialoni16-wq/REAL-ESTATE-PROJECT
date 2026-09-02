@@ -13,8 +13,7 @@ import {
 export const addProperty = async (req, res) => {
   try {
     const propertyData = { ...req.body };
-    // Image is optional — drop blank values so the model's generic
-    // default image is used instead.
+
     if (!propertyData.img || !propertyData.img.trim()) {
       delete propertyData.img;
     }
@@ -95,7 +94,6 @@ export const removeProperty = async (req, res) => {
   }
 };
 
-// Advanced search #1 — city + maxPrice + minRooms (+ optional type).
 export const searchByLocationBudget = async (req, res) => {
   try {
     const results = await searchPropertiesByLocationBudget(req.query);
@@ -106,7 +104,6 @@ export const searchByLocationBudget = async (req, res) => {
   }
 };
 
-// Advanced search #2 — minPrice + maxPrice + minSize (+ optional tier).
 export const searchByBudgetSpace = async (req, res) => {
   try {
     const results = await searchPropertiesByBudgetAndSpace(req.query);
@@ -117,7 +114,6 @@ export const searchByBudgetSpace = async (req, res) => {
   }
 };
 
-// GroupBy aggregation #1 — average price by city.
 export const getStatsAveragePriceByCity = async (req, res) => {
   try {
     const stats = await getAveragePriceByCity();
@@ -128,7 +124,6 @@ export const getStatsAveragePriceByCity = async (req, res) => {
   }
 };
 
-// GroupBy aggregation #2 — property count by type.
 export const getStatsCountByType = async (req, res) => {
   try {
     const stats = await getPropertyCountByType();

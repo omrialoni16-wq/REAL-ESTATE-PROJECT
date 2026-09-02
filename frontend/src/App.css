@@ -396,7 +396,6 @@ h1 {
   justify-content: center;
 }
 
-/* ---------- Semantic layout (header / nav / aside / section / footer) ---------- */
 .app-header {
   display: flex;
   align-items: center;
@@ -408,7 +407,7 @@ h1 {
 
 .app-header h1 {
   margin: 0;
-  /* text-shadow adds subtle depth to the main heading */
+
   text-shadow: 0 2px 8px rgba(44, 62, 80, 0.2);
 }
 

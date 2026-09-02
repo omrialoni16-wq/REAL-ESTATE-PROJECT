@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 
-// Used when the publisher leaves the image URL empty.
 const DEFAULT_IMAGE =
   "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=80";
 
@@ -24,7 +23,7 @@ const AddPropertyForm = ({ onAdd }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Image is optional — use a generic photo if none was provided.
+
     const payload = {
       ...formData,
       img: formData.img.trim() || DEFAULT_IMAGE,

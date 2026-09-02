@@ -30,7 +30,7 @@ export const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Password is required"],
       minlength: [6, "Password must be at least 6 characters"],
-      select: false, // never returned by default queries
+      select: false,
     },
     role: {
       type: String,
@@ -41,18 +41,15 @@ export const userSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-// Hash the password whenever it is set or changed, before saving.
 userSchema.pre("save", async function () {
   if (!this.isModified("password")) return;
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
 
-// Instance helper used by the login flow to verify a plaintext password.
 userSchema.methods.comparePassword = function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-// Accounts are stored in the new (users) cluster.
 const User = usersConnection.model("users", userSchema);
 export default User;

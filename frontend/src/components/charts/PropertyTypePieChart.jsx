@@ -2,8 +2,6 @@ import { useEffect, useMemo, useRef } from "react";
 import * as d3 from "d3";
 import "./Charts.css";
 
-// Pie/donut chart: distribution of listings by property type.
-// Aggregates the live properties list with d3 and renders an animated donut.
 const PropertyTypePieChart = ({ properties = [] }) => {
   const svgRef = useRef(null);
 
@@ -69,7 +67,6 @@ const PropertyTypePieChart = ({ properties = [] }) => {
       })
       .on("mouseleave", () => tooltip.style("opacity", 0));
 
-    // Animate the arcs growing in
     slices
       .transition()
       .duration(700)
@@ -78,7 +75,6 @@ const PropertyTypePieChart = ({ properties = [] }) => {
         return (t) => arc(i(t));
       });
 
-    // Center label = total listings
     g.append("text")
       .attr("text-anchor", "middle")
       .attr("dy", "-0.1em")

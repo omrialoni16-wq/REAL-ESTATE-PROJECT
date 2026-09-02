@@ -76,7 +76,6 @@
   fill: #95a5a6;
 }
 
-/* Shared floating tooltip for both charts */
 .chart-tooltip {
   position: absolute;
   pointer-events: none;

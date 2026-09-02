@@ -1,5 +1,4 @@
-/* Custom typography loaded via @font-face (Poppins, served from Google's CDN
-   so no binary font file needs to live in the repo). */
+
 @font-face {
   font-family: "PoppinsCustom";
   font-style: normal;
@@ -24,11 +23,10 @@
   margin: 0 0 6px 0;
   text-align: center;
   color: #2c3e50;
-  /* text-shadow for a subtle depth effect on the heading */
+
   text-shadow: 0 2px 6px rgba(44, 62, 80, 0.25);
 }
 
-/* Segmented role toggle */
 .role-toggle {
   display: flex;
   gap: 8px;
@@ -47,7 +45,7 @@
   font-weight: 600;
   cursor: pointer;
   color: #34495e;
-  /* transition for the toggle highlight */
+
   transition:
     background-color 0.3s ease,
     color 0.3s ease,
@@ -87,7 +85,6 @@
   flex: 1;
 }
 
-/* Agency-only fields collapse/expand with a transition */
 .agency-fields {
   display: flex;
   flex-direction: column;
@@ -95,7 +92,7 @@
   max-height: 0;
   opacity: 0;
   overflow: hidden;
-  /* transition on max-height + opacity drives the reveal animation */
+
   transition:
     max-height 0.4s ease,
     opacity 0.35s ease;

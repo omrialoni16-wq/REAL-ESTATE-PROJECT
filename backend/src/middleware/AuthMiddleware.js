@@ -1,8 +1,6 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
-// Verifies the Bearer JWT and attaches { id, role } to req.user.
-// Blocks every unauthenticated request to the main app.
 export const protect = async (req, res, next) => {
   try {
     const header = req.headers.authorization || "";
@@ -15,7 +13,6 @@ export const protect = async (req, res, next) => {
     const token = header.split(" ")[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Confirm the user still exists (token could outlive the account).
     const user = await User.findById(decoded.id).select("_id role");
     if (!user) {
       return res.status(401).json({ message: "User no longer exists." });
@@ -30,7 +27,6 @@ export const protect = async (req, res, next) => {
   }
 };
 
-// Allows only Admin accounts (e.g. managing property listings).
 export const requireAdmin = (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({ message: "Not authenticated." });
@@ -43,7 +39,6 @@ export const requireAdmin = (req, res, next) => {
   return next();
 };
 
-// Allows a user to modify their own account, or an admin to modify any account.
 export const requireSelfOrAdmin = (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({ message: "Not authenticated." });

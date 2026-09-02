@@ -5,11 +5,10 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./PropertyMap.css";
 
-// Leaflet's default marker icons break under bundlers (the image paths don't
-// resolve), so we point them at the package's bundled PNGs explicitly.
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
+import { API_URL } from "../config";
 
 L.Icon.Default.mergeOptions({
   iconUrl: markerIcon,
@@ -17,10 +16,6 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
-// Reusable single-property map (OpenStreetMap via Leaflet — no API key needed).
-// Pass EITHER explicit coordinates (`lat`/`lng`) OR an `address` string. When
-// only an address is given, the backend geocoder resolves it to coordinates
-// and a single marker is dropped on that exact location.
 const PropertyMap = ({ lat, lng, address, label = "Property location" }) => {
   const hasCoords = typeof lat === "number" && typeof lng === "number";
   const [center, setCenter] = useState(hasCoords ? [lat, lng] : null);
@@ -39,7 +34,7 @@ const PropertyMap = ({ lat, lng, address, label = "Property location" }) => {
 
     const geocode = async () => {
       try {
-        const res = await axios.get("http://localhost:5050/api/external/geocode", {
+        const res = await axios.get(`${API_URL}/api/external/geocode`, {
           params: { q: address },
         });
         if (!cancelled) setCenter([res.data.latitude, res.data.longitude]);

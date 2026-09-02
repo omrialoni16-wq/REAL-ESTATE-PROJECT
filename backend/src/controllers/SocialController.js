@@ -14,8 +14,7 @@ export const publishToTwitter = async (req, res) => {
     return res.status(status).json({
       message: "Failed to publish listing to Twitter.",
       error: error.message,
-      // When credentials are missing we still return the generated tweet so the
-      // frontend can show a preview of what *would* be posted.
+
       previewText: error.previewText,
     });
   }

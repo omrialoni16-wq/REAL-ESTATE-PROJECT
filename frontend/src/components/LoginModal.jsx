@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import "./RegistrationModal.css";
+import { API_URL } from "../config";
 
 const EMPTY_FORM = { email: "", password: "" };
 
@@ -21,10 +22,10 @@ const LoginModal = ({ onClose, onLoggedIn }) => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5050/api/auth/login",
+        `${API_URL}/api/auth/login`,
         formData,
       );
-      // Persist the session so it survives a page refresh.
+
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("user", JSON.stringify(response.data.user));
       if (onLoggedIn) onLoggedIn(response.data.user);

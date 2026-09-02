@@ -28,7 +28,7 @@ const inquirySchema = new mongoose.Schema(
       enum: ["new", "read", "closed"],
       default: "new",
     },
-    // Populated when a logged-in user submits; enables ownership-based delete.
+
     submittedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "users",

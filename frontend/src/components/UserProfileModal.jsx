@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import { API_URL } from "../config";
 
 const UserProfileModal = ({ user, onClose, onUpdated }) => {
   const [form, setForm] = useState({
@@ -21,7 +22,7 @@ const UserProfileModal = ({ user, onClose, onUpdated }) => {
     setError("");
     setSubmitting(true);
     try {
-      const res = await axios.put(`http://localhost:5050/api/users/${user._id}`, form);
+      const res = await axios.put(`${API_URL}/api/users/${user._id}`, form);
       const updated = { ...user, ...res.data };
       localStorage.setItem("user", JSON.stringify(updated));
       if (onUpdated) onUpdated(updated);

@@ -1,14 +1,5 @@
 import { TwitterApi } from "twitter-api-v2";
 
-// Social API integration — actively POSTS a listing to Twitter/X (not an embed).
-// Credentials come from the backend .env (never the frontend) so the app keys
-// stay secret:
-//   TWITTER_API_KEY, TWITTER_API_SECRET,
-//   TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_SECRET
-//
-// Create them at https://developer.twitter.com → an app with Read+Write
-// permission, then generate Access Token & Secret for your account.
-
 const hasCredentials = () =>
   Boolean(
     process.env.TWITTER_API_KEY &&
@@ -25,7 +16,6 @@ const getClient = () =>
     accessSecret: process.env.TWITTER_ACCESS_SECRET,
   });
 
-// Build the tweet text from a property, keeping within the 280-char limit.
 export const buildListingTweet = (property) => {
   const price =
     typeof property.price === "number"
@@ -51,7 +41,6 @@ export const publishListingToTwitter = async (property) => {
 
   const text = buildListingTweet(property);
 
-  // Allow previewing the generated tweet without real credentials configured.
   if (!hasCredentials()) {
     const err = new Error(
       "Twitter credentials are not configured on the server.",

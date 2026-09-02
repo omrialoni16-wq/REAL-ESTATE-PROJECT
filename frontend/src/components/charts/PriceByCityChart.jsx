@@ -2,14 +2,9 @@ import { useEffect, useMemo, useRef } from "react";
 import * as d3 from "d3";
 import "./Charts.css";
 
-// Bar chart: average property price per city.
-// Receives the live list of properties (already fetched from the backend in
-// App.jsx) and aggregates it client-side with d3 before drawing.
 const PriceByCityChart = ({ properties = [], topN = 8 }) => {
   const svgRef = useRef(null);
 
-  // Average price per city, sorted high → low and capped to the busiest cities
-  // so the axis stays readable.
   const data = useMemo(() => {
     const byCity = d3.rollup(
       properties.filter((p) => p && p.city && typeof p.price === "number"),
@@ -24,7 +19,7 @@ const PriceByCityChart = ({ properties = [], topN = 8 }) => {
 
   useEffect(() => {
     const svg = d3.select(svgRef.current);
-    svg.selectAll("*").remove(); // clear previous render before redrawing
+    svg.selectAll("*").remove();
 
     if (data.length === 0) return;
 
@@ -54,7 +49,6 @@ const PriceByCityChart = ({ properties = [], topN = 8 }) => {
       .nice()
       .range([innerHeight, 0]);
 
-    // X axis (city names, angled so longer names don't overlap)
     g.append("g")
       .attr("transform", `translate(0,${innerHeight})`)
       .call(d3.axisBottom(x))
@@ -62,7 +56,6 @@ const PriceByCityChart = ({ properties = [], topN = 8 }) => {
       .attr("transform", "rotate(-35)")
       .style("text-anchor", "end");
 
-    // Y axis (price, abbreviated with k/M)
     g.append("g").call(
       d3.axisLeft(y).ticks(6).tickFormat((v) => d3.format("~s")(v)),
     );

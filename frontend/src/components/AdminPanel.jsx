@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { API_URL } from "../config";
 
 const STATUS_COLORS = {
   new: "#e74c3c",
@@ -8,7 +9,7 @@ const STATUS_COLORS = {
 };
 
 const AdminPanel = ({ currentUser, onUserDeleted }) => {
-  const [tab, setTab] = useState("inquiries"); // "inquiries" | "users"
+  const [tab, setTab] = useState("inquiries");
 
   const [inquiries, setInquiries] = useState([]);
   const [inquiryFilter, setInquiryFilter] = useState("all");
@@ -25,7 +26,7 @@ const AdminPanel = ({ currentUser, onUserDeleted }) => {
   useEffect(() => {
     const loadInquiries = async () => {
       try {
-        const r = await axios.get("http://localhost:5050/api/inquiries");
+        const r = await axios.get(`${API_URL}/api/inquiries`);
         setInquiries(r.data);
       } catch (err) {
         console.error(err);
@@ -39,7 +40,7 @@ const AdminPanel = ({ currentUser, onUserDeleted }) => {
   useEffect(() => {
     const loadUsers = async () => {
       try {
-        const r = await axios.get("http://localhost:5050/api/users");
+        const r = await axios.get(`${API_URL}/api/users`);
         setUsers(r.data);
       } catch (err) {
         console.error(err);
@@ -52,7 +53,7 @@ const AdminPanel = ({ currentUser, onUserDeleted }) => {
 
   const handleStatusChange = async (id, newStatus) => {
     try {
-      const res = await axios.put(`http://localhost:5050/api/inquiries/${id}`, {
+      const res = await axios.put(`${API_URL}/api/inquiries/${id}`, {
         status: newStatus,
       });
       setInquiries((prev) =>
@@ -66,7 +67,7 @@ const AdminPanel = ({ currentUser, onUserDeleted }) => {
   const handleDeleteInquiry = async (id) => {
     if (!window.confirm("Delete this inquiry?")) return;
     try {
-      await axios.delete(`http://localhost:5050/api/inquiries/${id}`);
+      await axios.delete(`${API_URL}/api/inquiries/${id}`);
       setInquiries((prev) => prev.filter((inq) => inq._id !== id));
     } catch {
       alert("Failed to delete inquiry.");
@@ -76,7 +77,7 @@ const AdminPanel = ({ currentUser, onUserDeleted }) => {
   const handleDeleteUser = async (id) => {
     if (!window.confirm("Permanently delete this user?")) return;
     try {
-      await axios.delete(`http://localhost:5050/api/users/${id}`);
+      await axios.delete(`${API_URL}/api/users/${id}`);
       setUsers((prev) => prev.filter((u) => u._id !== id));
       if (onUserDeleted) onUserDeleted(id);
     } catch {
@@ -93,7 +94,7 @@ const AdminPanel = ({ currentUser, onUserDeleted }) => {
     e.preventDefault();
     setCreatingAdmin(true);
     try {
-      const res = await axios.post("http://localhost:5050/api/admin", adminForm);
+      const res = await axios.post(`${API_URL}/api/admin`, adminForm);
       setUsers((prev) => [res.data, ...prev]);
       setAdminForm({ firstName: "", lastName: "", email: "", password: "" });
       setShowCreateAdmin(false);
@@ -134,7 +135,6 @@ const AdminPanel = ({ currentUser, onUserDeleted }) => {
     >
       <h2 style={{ margin: "0 0 20px", color: "#2c3e50" }}>Admin Panel</h2>
 
-      {/* Tab bar */}
       <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
         {["inquiries", "users"].map((t) => (
           <button
@@ -156,7 +156,6 @@ const AdminPanel = ({ currentUser, onUserDeleted }) => {
         ))}
       </div>
 
-      {/* INQUIRIES TAB */}
       {tab === "inquiries" && (
         <>
           <div style={{ display: "flex", gap: "10px", marginBottom: "16px", flexWrap: "wrap" }}>
@@ -262,7 +261,6 @@ const AdminPanel = ({ currentUser, onUserDeleted }) => {
         </>
       )}
 
-      {/* USERS TAB */}
       {tab === "users" && (
         <>
           <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "12px" }}>

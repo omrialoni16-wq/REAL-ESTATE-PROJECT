@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import "./RegistrationModal.css";
+import { API_URL } from "../config";
 
 const EMPTY_FORM = {
   firstName: "",
@@ -30,15 +31,14 @@ const RegistrationModal = ({ onClose, onRegistered }) => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5050/api/auth/register",
+        `${API_URL}/api/auth/register`,
         formData,
       );
       setSuccess(true);
       setFormData(EMPTY_FORM);
       if (onRegistered) onRegistered(response.data);
     } catch (err) {
-      // Surface the backend validation message when available, otherwise
-      // fall back to a generic network error for edge cases.
+
       const message =
         err.response?.data?.message ||
         err.message ||
